@@ -21,8 +21,7 @@ export default {
         message: 'aka Junjie Li, JJLibra',
     },
     imageDomains: [
-        'blog.zhilu.cyou',
-        // '7.isyangs.cn',
+        'blog.xxfer.cn',
     ],
     injectHeadLinks: [
         // { rel: 'stylesheet', href: '//s1.hdslb.com/bfs/static/jinkela/long/font/medium.css', media: 'none', onload: 'this.media="all"' },
@@ -31,21 +30,21 @@ export default {
         {
             title: '',
             list: [
-                { icon: 'ph:house-duotone', title: '主页', link: '/' },
-                { icon: 'ph:pen-nib-duotone', title: '文章', link: '/article' },
-                // { icon: "ph:pen-nib-duotone", title: "文章", link: "https://blog.xxfer.cn", external: true },
-                // { icon: "ph:code-duotone", title: "项目", link: "/project" },
-                { icon: 'ph:code-duotone', title: '项目', link: 'https://github.com/JJLibra/#user-33976233-pinned-items-reorder-form', external: true },
-                { icon: 'ph:globe-duotone', title: '站点', link: '/site' },
-                { icon: 'ph:files-duotone', title: '日志', link: '/log' },
+                { icon: 'ph:house-bold', title: '主页', link: '/' },
+                { icon: 'ph:pen-nib-bold', title: '文章', link: '/article' },
+                // { icon: "ph:code-bold", title: "项目", link: "/project" },
+                { icon: 'ph:globe-bold', title: '站点', link: '/site' },
+                { icon: 'ph:files-bold', title: '日志', link: '/log' },
+                { icon: 'ph:code-bold', title: '项目', link: 'https://github.com/JJLibra/#user-33976233-pinned-items-reorder-form', external: true }
             ],
         },
         {
             title: '社交',
             list: [
-                { icon: 'ri:qq-fill', title: '群: 169994096', link: 'https://jq.qq.com/?_wv=1027&k=lQfNSeEd', external: true },
-                { icon: 'ph:github-logo-duotone', title: 'Github', link: 'https://github.com/JJLibra', external: true },
-                { icon: 'ph:telegram-logo-duotone', title: 'Telegram', link: 'https://t.me/JJLibra', external: true },
+                { icon: 'ri:qq-fill', title: 'QQ', link: 'https://qp.xxfer.cn', external: true },
+                { icon: 'ri:wechat-fill', title: 'Wechat', link: 'https://mp.xxfer.cn', external: true },
+                { icon: 'ri-bilibili-fill', title: 'Bilibili', link: 'https://space.bilibili.com/1327183873', external: true },
+                { icon: 'ri-github-fill', title: 'Github', link: 'https://github.com/JJLibra', external: true } // ph:github-logo-duotone
             ],
         },
     ],
