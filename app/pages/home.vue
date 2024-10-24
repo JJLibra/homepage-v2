@@ -18,7 +18,7 @@ const appConfig = useAppConfig()
                 {{ appConfig.description }}
             </p>
             <div>
-                <ZButton icon="ph:files-duotone" to="https://blog.zhilu.cyou/">
+                <ZButton icon="ph:files-duotone" to="https://blog.xxfer.cn/">
                     博客
                 </ZButton>
                 <ZButton icon="ph:github-logo-duotone" to="https://github.com/L33Z22L11">
@@ -39,7 +39,7 @@ const appConfig = useAppConfig()
             <p>
                 7 月完善<ZLink to="https://wiki.cooo.site/">
                     西邮Wiki
-                </ZLink>，8 月使用 Nuxt Content 重构了<ZLink to="https://blog.zhilu.cyou/">
+                </ZLink>，8 月使用 Nuxt Content 重构了<ZLink to="https://blog.xxfer.cn/">
                     个人博客
                 </ZLink>，但还未完成。
             </p>
