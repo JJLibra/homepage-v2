@@ -21,7 +21,7 @@ const appConfig = useAppConfig()
                 <ZButton icon="ph:files-duotone" to="https://blog.xxfer.cn/">
                     博客
                 </ZButton>
-                <ZButton icon="ph:github-logo-duotone" to="https://github.com/L33Z22L11">
+                <ZButton icon="ph:github-logo-duotone" to="https://github.com/JJLibra">
                     GitHub
                 </ZButton>
             </div>
@@ -29,56 +29,22 @@ const appConfig = useAppConfig()
 
         <ZField label="介绍">
             <p>
-                <ZLink to="https://github.com/xiyou-linuxer">
-                    西邮&thinsp;Linux&thinsp;兴趣小组
-                </ZLink> 成员，Windows 11 和 Arch Linux 用户。
+                东大村男子职业学校 NWPU 目前研 0
+            </p>
+            <p>
+                在深度学习的真火里，寻找解释世界的终极灵丹妙药...
             </p>
         </ZField>
 
         <ZField label="近期活动">
             <p>
-                7 月完善<ZLink to="https://wiki.cooo.site/">
-                    西邮Wiki
-                </ZLink>，8 月使用 Nuxt Content 重构了<ZLink to="https://blog.xxfer.cn/">
-                    个人博客
-                </ZLink>，但还未完成。
+                工位改造计划实施中...
+            </p>
+            <p>
+                日常摸鱼...
             </p>
         </ZField>
 
-        <ZField label="关于主页">
-            <p>
-                自2024年6月1日开始重构，目前还在修缮中。
-            </p>
-            <p>
-                感谢
-                <ZBadge img="https://cdn.libravatar.org/avatar/ecb2ea87c4532f007838d86d02798f89" to="https://github.com/KazariEX">
-                    KazariEX
-                </ZBadge>
-                <ZBadge img="https://7.isyangs.cn/8/655c9835780a0-8.jpg" to="https://github.com/isYangs">
-                    isYangs
-                </ZBadge>
-                等众多朋友为个人主页提供帮助。<br>
-                主页开源在
-                <ZLink to="https://github.com/L33Z22L11/homepage-v5" icon="ph:github-logo-duotone">
-                    L33Z22L11/homepage-v5
-                </ZLink>上。
-            </p>
-            <p>
-                欢迎使用、参考样式：<br>
-                <ZBadge rel="nofollow" img="https://image.m-c.top/?/images/2024/07/21/iyt3mhQCDe/b_a3f6e95501bcc4ce64c19c63a1211bcd.png" to="https://oio.mckfs.com/">
-                    Oiolosse MC服
-                </ZBadge>
-                <ZBadge rel="nofollow" img="https://bu.dusays.com/2024/07/13/66929d307adb9.png" to="https://henrywhu.cn/">
-                    Henry Moreau
-                </ZBadge>
-                <ZBadge rel="nofollow" img="https://api-space.tnxg.top/avatar?s=qq" to="https://tnxg.top/">
-                    天翔TNXG
-                </ZBadge>
-                <ZBadge rel="nofollow" img="https://ykc.im/icon.png" to="https://ykc.im/">
-                    York Chou
-                </ZBadge>
-            </p>
-        </ZField>
     </div>
 </template>
 
