@@ -44,7 +44,8 @@ export default {
                 { icon: 'ri:qq-fill', title: 'QQ', link: 'https://qp.xxfer.cn', external: true },
                 { icon: 'ri:wechat-fill', title: 'Wechat', link: 'https://mp.xxfer.cn', external: true },
                 { icon: 'ri-bilibili-fill', title: 'Bilibili', link: 'https://space.bilibili.com/1327183873', external: true },
-                { icon: 'ri-github-fill', title: 'Github', link: 'https://github.com/JJLibra', external: true } // ph:github-logo-duotone
+                { icon: 'ri-github-fill', title: 'Github', link: 'https://github.com/JJLibra', external: true }, // ph:github-logo-duotone
+                // { icon: 'ri-file-music-fill', title: 'Music', link: '/music' },
             ],
         },
     ],
