@@ -1,5 +1,4 @@
 export default interface FeedProps {
-    [key: string]: any
     title: string
     link: {
         $href: string
@@ -7,15 +6,9 @@ export default interface FeedProps {
     id: string
     published: string
     updated: string
-    summary: {
-        '#text': string
-        '$type': string
-    }
-    content?: {
-        $src: string
-        $type: string
-    }
-    category: {
+    summary: string
+    content?: string
+    category?: {
         $term: string
         $scheme: string
     }[]

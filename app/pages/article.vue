@@ -30,7 +30,18 @@ const articles = computed(() => {
     <p>{{ error }}</p>
   </template>
   <div v-else class="article-list">
-        <ZArticle v-for="article in articles" :key="article.id" v-bind="article" />
+    <ZArticle
+      v-for="article in articles"
+      :key="article.id"
+      :title="article.title"
+      :content="article.content"
+      :summary="article.summary"
+      :published="article.published"
+      :updated="article.updated"
+      :link="article.link"
+      :id="article.id"
+      :category="article.category"
+    />
   </div>
   <div class="article-more">
     <ZRawLink to="https://blog.xxfer.cn/">

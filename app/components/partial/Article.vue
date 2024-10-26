@@ -32,10 +32,10 @@ function getPostTime(date: string) {
             <time :datetime="published">{{ tPublishedLabel }}</time>
         </div>
         <h2 class="article-title">
-            {{ title['#text'] || title }}
+            {{ title }}
         </h2>
         <p class="article-description">
-            {{ summary['#text'] || summary }}
+            {{ summary }}
         </p>
     </ZRawLink>
 </template>
