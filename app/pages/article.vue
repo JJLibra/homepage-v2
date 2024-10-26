@@ -33,7 +33,7 @@ const articles = computed(() => data.value.slice(0, 11))
             <Icon name="ph:link-duotone" />
             <span>友链</span>
         </ZRawLink>
-        <ZRawLink to="https://blog.xxfer.cn/archive">
+        <ZRawLink to="https://blog.xxfer.cn/archives">
             <Icon name="ph:archive-duotone" />
             <span>归档</span>
         </ZRawLink>
