@@ -27,7 +27,7 @@ export default defineNuxtConfig({
 
     components: [
         { path: '~/components/partial', prefix: 'Z' },
-        { path: '~/components/zhilu', prefix: 'ZL' },
+        { path: '~/components/xxfer', prefix: 'ZL' },
         '~/components',
     ],
 
