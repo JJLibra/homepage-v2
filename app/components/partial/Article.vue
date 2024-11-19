@@ -7,7 +7,6 @@ const props = defineProps<FeedProps>()
 
 const tPublishedLabel = getPostTime(props.published)
 const tUpdatedLabel = getPostTime(props.updated)
-
 function getPostTime(date: string) {
     const postDate = new Date(date)
     const now = new Date()
@@ -27,15 +26,14 @@ function getPostTime(date: string) {
     <ZRawLink class="article-card" :to="link.$href || id">
         <div class="article-header">
             <time v-if="tPublishedLabel !== tUpdatedLabel" :datetime="updated">
-                {{ tUpdatedLabel }}
-            </time>
+                {{ tUpdatedLabel }}</time>
             <time :datetime="published">{{ tPublishedLabel }}</time>
         </div>
         <h2 class="article-title">
-            {{ title }}
+            {{ title._ || title }}
         </h2>
-        <p class="article-description">
-            {{ summary }}
+        <p class="article-descrption">
+            {{ summary._ || summary }}
         </p>
     </ZRawLink>
 </template>
@@ -47,7 +45,7 @@ function getPostTime(date: string) {
     transition: all 0.2s;
 
     &:hover {
-        background-color: var(--c-primary-soft);
+        background-color: var(--c-bg-soft);
     }
 
     >* {
@@ -71,7 +69,7 @@ function getPostTime(date: string) {
     font-weight: normal;
 }
 
-.article-description {
+.article-descrption {
     color: var(--c-text-2);
 }
 </style>

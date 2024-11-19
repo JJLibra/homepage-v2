@@ -1,3 +1,12 @@
+<script setup lang="ts">
+const appConfig = useAppConfig()
+useSeoMeta({
+    ogType: 'profile',
+    description: appConfig.description,
+    ogImage: appConfig.author.avatar,
+})
+</script>
+
 <template>
     <ZSidebar />
     <div class="content">
@@ -8,6 +17,7 @@
     </div>
 </template>
 
+<!-- eslint-disable-next-line vue/enforce-style-attribute -->
 <style lang="scss">
 #z-root {
     display: flex;

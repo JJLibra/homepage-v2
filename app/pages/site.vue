@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CardProps } from '~/components/particle/Card.vue'
+import type { CardProps } from '~/components/partial/Card.vue'
 
 useHead({ title: '站点' })
 definePageMeta({ headerText: '一些网站' })
@@ -91,10 +91,9 @@ const orgSites: Array<CardProps> = [
 <template>
     <ZTitle>工具类站点</ZTitle>
     <ZCardList :data-list="toolSites" />
-
     <ZTitle>组织门户</ZTitle>
     <ZCardList :data-list="orgSites" />
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 </style>

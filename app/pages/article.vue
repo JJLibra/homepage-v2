@@ -4,62 +4,46 @@ definePageMeta({ headerText: '最近更新' })
 
 const { data, error, status } = useLazyFetch('/api/feed/blog')
 
-const articles = computed(() => {
-  if (data.value && Array.isArray(data.value)) {
-    return data.value.slice(0, 11)
-  }
-  return []
-})
+const articles = computed(() => data.value.slice(0, 11))
 </script>
 
 <template>
-  <ZTitle icon="👀">
+    <ZTitle icon="👀">
     <span class="badge-text">
       来自博客
       <ZRawLink to="https://blog.xxfer.cn">
         <mark>小李同学Coding</mark>
       </ZRawLink>
-      的文章
-    </span>
-  </ZTitle>
+            的文章
+        </span>
+    </ZTitle>
 
-  <template v-if="status === 'pending'">
-    <p>加载中…</p>
-  </template>
-  <template v-else-if="status === 'error'">
-    <p>{{ error }}</p>
-  </template>
-  <div v-else class="article-list">
-    <ZArticle
-      v-for="article in articles"
-      :key="article.id"
-      :title="article.title"
-      :content="article.content"
-      :summary="article.summary"
-      :published="article.published"
-      :updated="article.updated"
-      :link="article.link"
-      :id="article.id"
-      :category="article.category"
-    />
-  </div>
-  <div class="article-more">
-    <ZRawLink to="https://blog.xxfer.cn/">
-      <Icon name="ph:navigation-arrow-duotone" />
-      <span>访问</span>
-    </ZRawLink>
-    <ZRawLink to="https://blog.xxfer.cn/link">
-      <Icon name="ph:link-duotone" />
-      <span>友链</span>
-    </ZRawLink>
+    <template v-if="status === 'pending'">
+        <p>加载中…</p>
+    </template>
+    <template v-else-if="status === 'error'">
+        <p>{{ error }}</p>
+    </template>
+    <div v-else class="article-list">
+        <ZArticle v-for="article in articles" :key="article.id" v-bind="article" />
+    </div>
+    <div class="article-more">
+        <ZRawLink to="https://blog.xxfer.cn/">
+            <Icon name="ph:navigation-arrow-duotone" />
+            <span>访问</span>
+        </ZRawLink>
+        <ZRawLink to="https://blog.xxfer.cn/link">
+            <Icon name="ph:link-duotone" />
+            <span>友链</span>
+        </ZRawLink>
     <ZRawLink to="https://blog.xxfer.cn/archives">
-      <Icon name="ph:archive-duotone" />
-      <span>归档</span>
-    </ZRawLink>
-  </div>
+            <Icon name="ph:archive-duotone" />
+            <span>归档</span>
+        </ZRawLink>
+    </div>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .article-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -87,7 +71,7 @@ const articles = computed(() => {
         &:hover {
             opacity: 1;
             background-color: var(--c-primary-soft);
-            color: var(--c-primary-1);
+            color: var(--c-primary);
         }
     }
 }

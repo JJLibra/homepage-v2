@@ -8,14 +8,14 @@ const appConfig = useAppConfig()
 </script>
 
 <template>
-    <ZLAvatar class="avatar" />
+    <ZhiluAvatar class="avatar" />
     <div class="wrapper">
         <ZField label="<span style='font-size: 3rem;'>👋</span>">
             <h1 style="font-size: 3rem;">
                 你好，<br>我是<mark>{{ appConfig.author.name }}</mark>
             </h1>
             <p class="desc">
-                {{ appConfig.description }}
+                {{ appConfig.subtitle }}
             </p>
             <div>
                 <ZButton icon="ph:files-duotone" to="https://blog.xxfer.cn/">
@@ -44,11 +44,10 @@ const appConfig = useAppConfig()
                 日常摸鱼...
             </p>
         </ZField>
-
     </div>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .avatar {
     position: fixed;
     opacity: 0.2;

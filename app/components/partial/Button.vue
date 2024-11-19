@@ -1,43 +1,63 @@
 <script setup lang="ts">
+import { ZRawLink } from '#components'
+
 export interface ButtonProps {
     icon?: string
     text?: string
+    to?: string
     desc?: string
+    primary?: boolean
 }
 defineProps<ButtonProps>()
 </script>
 
 <template>
-    <ZRawLink class="button">
+    <component :is="to ? ZRawLink : 'button'" :to class="button" :class="{ primary }" type="button">
         <div class="button-main">
             <Icon v-if="icon" :name="icon" />
-            {{ text }}
-            <slot />
+            <slot>{{ text }}</slot>
         </div>
         <div v-if="desc" class="button-desc">
             {{ desc }}
         </div>
-    </ZRawLink>
+    </component>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .button {
     display: inline-block;
-    align-items: center;
     padding: 0.4em 0.6em;
-    border: 1px solid var(--c-border);
-    border-radius: 0.4em;
-    box-shadow: 0.05em 0.1em 0.5em var(--c-primary-soft);
-    background-color: var(--c-bg-2);
+    border: 1px solid var(--c-bg-soft);
+    border-radius: 0.5em;
+    box-shadow: 0 2px 0.5em var(--ld-shadow);
+    background-color: var(--c-bg-1);
+    line-height: normal;
     vertical-align: middle;
-    transition: background-color 0.2s;
+    transition: color 0.1s, background-color 0.2s;
+    cursor: pointer;
 
-    & + & {
-        margin-left: 0.8em;
+    &.primary {
+        background-color: var(--c-primary);
+        color: var(--c-bg);
     }
 
     &:hover {
-        background-color: var(--c-bg-3);
+        background-color: var(--c-bg-2);
+        color: var(--c-text);
+    }
+
+    &:active {
+        background-color: var(--ld-shadow);
+    }
+
+    &:disabled {
+        background-color: initial;
+        color: revert;
+        cursor: not-allowed;
+    }
+
+    & + .button {
+        margin-left: 0.8em;
     }
 }
 
@@ -46,10 +66,6 @@ defineProps<ButtonProps>()
     align-items: center;
     justify-content: center;
     gap: 0.2em;
-
-    .iconify {
-        font-size: 1.2em;
-    }
 }
 
 .button-desc {

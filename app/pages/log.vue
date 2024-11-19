@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ZhiluIcon, ZhiluIconOld } from '#components'
+
 useHead({ title: '日志' })
 definePageMeta({ headerText: '互联网上的活动记录' })
 const timeline = {
@@ -16,12 +18,15 @@ const timeline = {
             <div class="timeline-item-date">
                 {{ date }}
             </div>
-            <ZRender class="timeline-item-content" :content="content" />
+            <p v-if="typeof content === 'string'" class="timeline-item-content" v-html="content" />
+            <p v-else class="timeline-item-content">
+                <component :is="content" />
+            </p>
         </div>
     </div>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .timeline {
     position: relative;
     width: fit-content;
@@ -34,7 +39,7 @@ const timeline = {
         bottom: 0;
         left: 0;
         width: 4px;
-        background-color: var(--c-bg-3);
+        background-color: var(--c-bg-2);
     }
 }
 
@@ -52,7 +57,7 @@ const timeline = {
     .timeline-item-content {
         padding: 0.5em 0.8em;
         border-radius: 0.5em;
-        background-color: var(--c-bg-3);
+        background-color: var(--c-bg-2);
     }
 }
 
