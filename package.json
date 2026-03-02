@@ -28,6 +28,7 @@
     "embla-carousel-vue": "catalog:ui",
     "embla-carousel-wheel-gestures": "catalog:ui",
     "fast-xml-parser": "catalog:util",
+    "lucide-vue-next": "^0.576.0",
     "nuxt": "catalog:framework",
     "vue": "catalog:framework",
     "vue-router": "catalog:framework",
