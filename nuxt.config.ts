@@ -1,84 +1,98 @@
-import homepageConfig from './homepage.config'
+import homepageConfig, { routeRules } from './homepage.config'
+import packageJson from './package.json'
 
 export default defineNuxtConfig({
-    app: {
-        rootId: 'z-root',
-        head: {
-            htmlAttrs: {
-                lang: homepageConfig.language,
-            },
-            link: [
-                { rel: 'icon', href: homepageConfig.favicon },
-            ],
-            meta: [
-                { name: 'author', content: homepageConfig.author.name },
-                { name: 'color-scheme', content: 'light dark' },
-                { 'name': 'generator', 'data-github-repo': 'https://github.com/L33Z22L11/homepage-v5' },
-            ],
-            templateParams: {
-                separator: '|',
-            },
-            titleTemplate: `%s %separator ${homepageConfig.title}`,
-        },
-    },
+	app: {
+		head: {
+			link: [
+				{ rel: 'icon', href: homepageConfig.favicon },
+				// "InterVariable", "Inter", "InterDisplay"
+				{ rel: 'stylesheet', href: 'https://rsms.me/inter/inter.css', media: 'print', onload: 'this.media="all"' },
+			],
+			meta: [
+				{ name: 'author', content: [homepageConfig.author.name, homepageConfig.author.email].filter(Boolean).join(', ') },
+				{ name: 'color-scheme', content: 'light dark' },
+				{ 'name': 'generator', 'content': `${packageJson.name} ${packageJson.version}`, 'data-github-repo': packageJson.homepage },
+			],
+			templateParams: {
+				separator: '|',
+			},
+			titleTemplate: `%s %separator ${homepageConfig.title}`,
+		},
+		rootAttrs: {
+			id: 'z-root',
+		},
+	},
 
-    compatibilityDate: '2024-08-03',
+	compatibilityDate: '2024-08-03',
 
-    components: [
-        { path: '~/components/partial', prefix: 'Z' },
-        '~/components',
-    ],
+	components: [
+		{ path: '~/components/partial', prefix: 'Z' },
+		'~/components',
+	],
 
-    css: [
-        '@/assets/color.scss',
-        '@/assets/main.scss',
-    ],
+	css: [
+		'@/assets/color.scss',
+		'@/assets/main.scss',
+	],
 
-    experimental: {
-        viewTransition: true,
-    },
+	// @keep-sorted
+	experimental: {
+		extractAsyncDataHandlers: true,
+		typescriptPlugin: true,
+		viewTransition: true,
+	},
 
-    future: {
-        compatibilityVersion: 4,
-    },
+	features: {
+		inlineStyles: false,
+	},
 
-    vite: {
-        css: {
-            preprocessorOptions: {
-                scss: {
-                    additionalData: '@use "@/assets/_variable.scss" as *;',
-                    api: 'modern-compiler',
-                },
-            },
-        },
-    },
+	future: {
+		compatibilityVersion: 5,
+	},
 
-    modules: [
-        '@nuxt/icon',
-        '@nuxt/image',
-        '@nuxtjs/color-mode',
-        '@nuxtjs/seo',
-        '@pinia/nuxt',
-        '@vueuse/nuxt',
-    ],
+	routeRules,
 
-    colorMode: {
-        preference: 'system',
-        fallback: 'light',
-        classSuffix: '',
-    },
+	vite: {
+		css: {
+			preprocessorOptions: {
+				scss: {
+					additionalData: '@use "@/assets/_variable.scss" as *;',
+				},
+			},
+		},
+		server: {
+			allowedHosts: true,
+		},
+	},
 
-    image: {
-        domains: [],
-        format: ['avif', 'webp'],
-    },
+	// @keep-sorted
+	modules: [
+		'@nuxt/icon',
+		'@nuxt/image',
+		'@nuxtjs/color-mode',
+		'@nuxtjs/seo',
+		'@pinia/nuxt',
+		'@vueuse/nuxt',
+	],
 
-    ogImage: {
-        enabled: false,
-    },
+	colorMode: {
+		preference: 'system',
+		fallback: 'light',
+		classSuffix: '',
+	},
 
-    site: {
-        name: homepageConfig.title,
-        url: homepageConfig.url,
-    },
+	image: {
+		provider: 'none',
+	},
+
+	ogImage: {
+		enabled: false,
+	},
+
+	site: {
+		name: homepageConfig.title,
+		url: homepageConfig.url,
+		defaultLocale: homepageConfig.language,
+	},
 })

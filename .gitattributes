@@ -1,0 +1,3 @@
+*                 text=auto      eol=lf
+*.md              diff=markdown  linguist-detectable
+pnpm-lock.yaml    -diff

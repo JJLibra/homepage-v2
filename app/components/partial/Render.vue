@@ -1,20 +1,12 @@
 <script setup lang="ts">
-import { ZLIcon, ZLIconOld, ZLink } from '#components'
-
-const props = defineProps<{
-    tag?: string
-    content: string
+defineProps<{
+	content: string | VNode | (() => VNode)
 }>()
-
-function render() {
-    const { tag = 'div', content } = props
-    return h({
-        template: `<${tag}>${content}</${tag}>`,
-        components: { ZLIcon, ZLIconOld, ZLink },
-    })
-}
 </script>
 
 <template>
-    <render />
+<template v-if="typeof content === 'string'">
+	{{ content }}
+</template>
+<component :is="content" v-else />
 </template>

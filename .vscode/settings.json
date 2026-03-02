@@ -1,0 +1,38 @@
+{
+  "[css]": {
+    "editor.defaultFormatter": "stylelint.vscode-stylelint"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[vue]": {
+    "editor.defaultFormatter": null
+  },
+  "[yaml]": {
+    "editor.formatOnSave": false
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always",
+    "source.fixAll.stylelint": "always"
+  },
+  "editor.tabSize": 3,
+  "errorLens.fontSize": ".8em",
+  "errorLens.messageBackgroundMode": "message",
+  "errorLens.messageMaxChars": 50,
+  "errorLens.messageTemplate": "$severity $message",
+  "iconify.inplace": false,
+  "stylelint.validate": [
+    "css",
+    "postcss",
+    "scss",
+    "vue"
+  ],
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "vue.autoInsert.dotValue": true,
+  "vue.format.template.initialIndent": false,
+  "vue.inlayHints.destructuredProps": true,
+  "vue.inlayHints.inlineHandlerLeading": true,
+  "vue.inlayHints.missingProps": true,
+  "vue.inlayHints.vBindShorthand": true,
+  "yaml.format.singleQuote": true
+}

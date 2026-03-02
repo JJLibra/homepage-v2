@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { NuxtLink } from '#components'
-
-defineProps<{ to?: string }>()
+const props = defineProps<{ to?: string }>()
+const external = computed(() => isExtLink(props.to))
 </script>
 
 <template>
-    <component :is="to ? NuxtLink : 'span'" :to :target="isExtLink(to) ? '_blank' : undefined">
-        <slot />
-    </component>
+<a v-if="to === '#'" :href="to"><slot /></a>
+<span v-else-if="to === undefined"><slot /></span>
+<NuxtLink v-else :to :target="external ? '_blank' : undefined">
+	<slot :external />
+</NuxtLink>
 </template>

@@ -1,22 +1,23 @@
+type MaybeHtmlAtom = string | {
+	_: string
+	$type: string
+}
+
 export default interface FeedProps {
-    [key: string]: any
-    title: string
-    link: {
-        $href: string
-    }
-    id: string
-    published: string
-    updated: string
-    summary: {
-        _: string
-        $type: string
-    }
-    content?: {
-        $src: string
-        $type: string
-    }
-    category: {
-        $term: string
-        $scheme: string
-    }[]
+	title: MaybeHtmlAtom
+	link: {
+		$href: string
+	}
+	id: string
+	published: string
+	updated?: string
+	summary: MaybeHtmlAtom
+	content?: {
+		$src: string
+		$type: string
+	}
+	category: {
+		$term: string
+		$scheme: string
+	}[]
 }
