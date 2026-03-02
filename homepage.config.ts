@@ -1,10 +1,10 @@
 import type { NitroConfig } from 'nitropack'
 
 const author = {
-	name: '纸鹿本鹿',
+	name: '小李同学',
 	avatar: 'https://wsrv.nl/?url=github.com/L33Z22L11.png',
 	email: 'hi@zhilu.cyou',
-	homepage: 'https://www.zhilu.site/',
+	homepage: 'https://www.junjieli.top/',
 }
 
 const homepageConfig = {
@@ -15,8 +15,8 @@ const homepageConfig = {
 	language: 'zh-CN',
 	timezone: 'Asia/Shanghai',
 	favicon: '/icon.png',
-	url: 'https://www.zhilu.site/',
-	blogAtom: 'https://blog.zhilu.site/atom.xml',
+	url: 'https://www.junjieli.top/',
+	blogAtom: 'https://blog.junjieli.top/atom.xml',
 }
 
 // https://nitro.build/config#routerules
