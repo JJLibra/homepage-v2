@@ -56,9 +56,9 @@ const appConfig = useAppConfig()
 			截至2025年9月，合作发表一篇
 			<ZLink to="https://arxiv.org/pdf/2507.02373">AAAI2026(CCF A)</ZLink>
 			，一作发表一篇
-			<ZLink to="https://arxiv.org/pdf/2507.02373">SCI</ZLink>
+			<ZLink to="https://doi.org/10.3390/drones9120811">SCI</ZLink>
 			，合作发表一篇
-			<ZLink to="https://arxiv.org/pdf/2507.02373">SCI</ZLink>
+			<ZLink to="https://doi.org/10.3390/drones9080557">SCI</ZLink>
 			。
 		</p>
 		<p>

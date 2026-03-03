@@ -4,29 +4,34 @@ definePageMeta({ headerText: '参与的开源项目' })
 
 const projects = [
 	{
-		title: 'blog-v3',
-		github: 'L33Z22L11/blog-v3',
-		description: '个人博客网站，收获 100 star，被多人使用',
+		title: 'willow-god/Friend-Circle-Lite',
+		github: 'willow-god/Friend-Circle-Lite',
+		description: '🐱一个精简版，无后端，且仅利用github action运行的精简版友链朋友圈程序，兼容fc的json格式信息。',
 	},
 	{
-		title: 'homepage-v5',
-		github: 'L33Z22L11/homepage-v5',
-		description: '个人首页，使用 Nuxt.js 构建',
+		title: 'Astar-qt',
+		github: 'JJLibra/Astar-qt',
+		description: '✌️一个基于 Astar 算法的无人机路径规划演示程序，使用 QT 框架实现。',
 	},
 	{
-		title: 'hexo-theme-stellar',
-		github: 'xaoxuu/hexo-theme-stellar',
-		description: '简洁优雅的 Hexo 主题',
+		title: 'SALAD-Pan',
+		github: 'JJLibra/SALAD-Pan',
+		description: '🤗 SALAD-Pan: Sensor-Agnostic Latent Adaptive Diffusion for Pan-Sharpening',
 	},
 	{
-		title: 'blog-feed',
-		github: 'xiyou-linuxer/blog-feed',
-		description: '使用 Nitro + MongoDB 搭建的博客订阅聚合 API',
+		title: 'VScode-FreeimgUploader',
+		github: 'JJLibra/VScode-FreeimgUploader',
+		description: '🔧一个对接 Freeimg 图床的 VScode 插件',
 	},
 	{
-		title: 'zhilu-cv',
-		github: 'L33Z22L11/zhilu-cv',
-		description: '个人简历，使用 Nuxt.js 构建',
+		title: 'Paper-presentation-template',
+		github: 'JJLibra/Paper-presentation-template',
+		description: '📑一个基于 Next.js 的展示模板，用于展示科研论文或项目',
+	},
+	{
+		title: 'Pokemonc',
+		github: 'JJLibra/Pokemonc',
+		description: '👻一个神奇宝贝终端打印机，90后&00后的童年回忆',
 	},
 ]
 </script>

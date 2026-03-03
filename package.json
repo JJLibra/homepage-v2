@@ -36,6 +36,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:quality",
+    "@iconify-json/ri": "^1.2.10",
     "@zinkawaii/stylelint-config": "catalog:quality",
     "eslint": "catalog:quality",
     "sass-embedded": "catalog:framework",
