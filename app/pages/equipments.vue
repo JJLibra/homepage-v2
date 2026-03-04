@@ -157,12 +157,15 @@ onMounted(() => {
 
           <!-- Card -->
           <div class="timeline-card">
-            <h3 class="timeline-title">
-              {{ item.title }}
-            </h3>
-            <p class="timeline-desc">
-              {{ item.desc }}
-            </p>
+            <div class="card-header">
+              <span class="card-year-badge">{{ item.year }}</span>
+              <h3 class="card-title">
+                {{ item.title }}
+              </h3>
+            </div>
+            <div class="card-desc">
+              <p>{{ item.desc }}</p>
+            </div>
 
             <!-- Embla Carousel -->
             <div class="timeline-media">
@@ -419,18 +422,47 @@ onMounted(() => {
   margin-right: 0;
 }
 
-.timeline-title {
-  font-size: 1.15rem;
-  font-weight: 600;
-  margin-bottom: 0.4rem;
-  letter-spacing: -0.01em;
+/* ── Card header (year badge + title, centered like reference) ── */
+.card-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.8rem 0 0.6rem;
 }
 
-.timeline-desc {
-  font-size: 0.9rem;
-  color: var(--c-text-2);
-  line-height: 1.6;
-  margin-bottom: 0.8rem;
+.card-year-badge {
+  font-family: var(--font-monospace);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--c-primary);
+  background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-align: center;
+}
+
+/* ── Description in a rounded pill container ── */
+.card-desc {
+  margin: 0 0 0.8rem;
+  padding: 0.6rem 0.85rem;
+  background-color: var(--c-bg-soft);
+  border-radius: 0.5rem;
+  border: 1px solid var(--c-border);
+
+  p {
+    font-size: 0.85rem;
+    color: var(--c-text-2);
+    line-height: 1.6;
+    margin: 0;
+  }
 }
 
 /* ── Carousel ── */
