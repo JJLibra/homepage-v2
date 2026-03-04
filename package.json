@@ -36,6 +36,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:quality",
+    "@iconify-json/ph": "^1.2.2",
     "@iconify-json/ri": "^1.2.10",
     "@zinkawaii/stylelint-config": "catalog:quality",
     "eslint": "catalog:quality",

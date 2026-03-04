@@ -21,6 +21,7 @@ export default defineAppConfig({
 				{ icon: 'ri:quill-pen-line', text: '文章', url: '/article' },
 				{ icon: 'ri:code-line', text: '项目', url: '/project' },
 				{ icon: 'ri:planet-line', text: '站点', url: '/site' },
+				{ icon: 'ph:keyboard', text: '键盘', url: '/equipments' },
 				{ icon: 'ri:history-line', text: '日志', url: '/log' },
 			],
 		},
