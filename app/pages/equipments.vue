@@ -157,14 +157,11 @@ onMounted(() => {
 
           <!-- Card -->
           <div class="timeline-card">
-            <div class="card-header">
-              <span class="card-year-badge">{{ item.year }}</span>
-              <h3 class="card-title">
-                {{ item.title }}
-              </h3>
-            </div>
+            <h3 class="card-title">
+              {{ item.title }}
+            </h3>
             <div class="card-desc">
-              <p>{{ item.desc }}</p>
+              {{ item.desc }}
             </div>
 
             <!-- Embla Carousel -->
@@ -390,25 +387,22 @@ onMounted(() => {
   margin-left: 7px;
 }
 
-/* ── Card ── */
+/* ── Card (matches Project component style: --c-bg-1 bg, --c-border border) ── */
 .timeline-card {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   width: 420px;
   max-width: calc(50% - 50px);
-  padding: 1.25rem;
-  border-radius: 0.75rem;
-  background-color: var(--ld-bg-card);
-  box-shadow:
-    0 2px 8px color-mix(in srgb, var(--ld-shadow) 60%, transparent),
-    0 8px 24px color-mix(in srgb, var(--ld-shadow) 30%, transparent);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background-color: var(--c-bg-1);
   border: 1px solid var(--c-border);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: background-color 0.2s;
 
   &:hover {
-    transform: translateY(-3px);
-    box-shadow:
-      0 4px 12px color-mix(in srgb, var(--ld-shadow) 70%, transparent),
-      0 12px 32px color-mix(in srgb, var(--ld-shadow) 40%, transparent);
+    background-color: var(--c-bg-2);
   }
 }
 
@@ -422,47 +416,22 @@ onMounted(() => {
   margin-right: 0;
 }
 
-/* ── Card header (year badge + title, centered like reference) ── */
-.card-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.8rem 0 0.6rem;
-}
-
-.card-year-badge {
-  font-family: var(--font-monospace);
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--c-primary);
-  background: color-mix(in srgb, var(--c-primary) 12%, transparent);
-  padding: 0.15rem 0.6rem;
-  border-radius: 999px;
-  letter-spacing: 0.04em;
-}
-
+/* ── Title (keyboard name, top of card, bold like Project .project-title) ── */
 .card-title {
   font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-weight: bold;
   text-align: center;
+  padding: 0.4rem 0 0;
 }
 
-/* ── Description in a rounded pill container ── */
+/* ── Description (rounded container like screenshot) ── */
 .card-desc {
-  margin: 0 0 0.8rem;
-  padding: 0.6rem 0.85rem;
+  font-size: 0.8em;
+  color: var(--c-text-2);
+  line-height: 1.6;
+  padding: 0.55rem 0.75rem;
   background-color: var(--c-bg-soft);
   border-radius: 0.5rem;
-  border: 1px solid var(--c-border);
-
-  p {
-    font-size: 0.85rem;
-    color: var(--c-text-2);
-    line-height: 1.6;
-    margin: 0;
-  }
 }
 
 /* ── Carousel ── */
