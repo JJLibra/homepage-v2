@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import Autoplay from 'embla-carousel-autoplay'
+import emblaCarouselVue from 'embla-carousel-vue'
+
 useHead({ title: '键盘' })
 definePageMeta({ headerText: '我的键盘时间线' })
 
@@ -54,13 +57,78 @@ const keyboardEvents: KeyboardEvent[] = [
     ],
   },
 ]
+
+// Carousel instances per keyboard item
+interface CarouselInstance {
+  emblaRef: ReturnType<typeof emblaCarouselVue>[0]
+  emblaApi: ReturnType<typeof emblaCarouselVue>[1]
+  selectedIndex: Ref<number>
+  scrollSnaps: Ref<number[]>
+}
+
+const carousels: CarouselInstance[] = keyboardEvents.map(() => {
+  const [emblaRef, emblaApi] = emblaCarouselVue(
+    { loop: true, skipSnaps: false },
+    [Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true })],
+  )
+  return {
+    emblaRef,
+    emblaApi,
+    selectedIndex: ref(0),
+    scrollSnaps: ref<number[]>([]),
+  }
+})
+
+onMounted(() => {
+  carousels.forEach((c) => {
+    const api = c.emblaApi.value
+    if (!api)
+      return
+    c.scrollSnaps.value = api.scrollSnapList()
+    c.selectedIndex.value = api.selectedScrollSnap()
+    api.on('select', () => {
+      c.selectedIndex.value = api.selectedScrollSnap()
+    })
+    api.on('reInit', () => {
+      c.scrollSnaps.value = api.scrollSnapList()
+      c.selectedIndex.value = api.selectedScrollSnap()
+    })
+  })
+})
+
+function scrollTo(carouselIndex: number, snapIndex: number) {
+  const api = carousels[carouselIndex].emblaApi.value
+  if (api)
+    api.scrollTo(snapIndex)
+}
+
+// Scroll-driven entrance animation via IntersectionObserver
+const itemRefs = ref<HTMLElement[]>([])
+const visibleItems = ref<Set<number>>(new Set())
+
+onMounted(() => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const idx = Number((entry.target as HTMLElement).dataset.index)
+        if (entry.isIntersecting) {
+          visibleItems.value.add(idx)
+          // once visible, stop observing
+          observer.unobserve(entry.target)
+        }
+      })
+    },
+    { threshold: 0.15, rootMargin: '0px 0px -40px 0px' },
+  )
+  itemRefs.value.forEach(el => el && observer.observe(el))
+})
 </script>
 
 <template>
   <section class="timeline-page">
     <header class="timeline-header">
-      <h1>我的键盘时间线</h1>
-      <p>中间是一条时间线，两侧交错展示不同阶段的键盘，它们的照片 / 视频会在卡片中循环流动。</p>
+      <h1>我的<mark>键盘</mark>时间线</h1>
+      <p>记录每一把陪伴我敲下代码的伙伴</p>
     </header>
 
     <div class="timeline-wrapper">
@@ -70,45 +138,69 @@ const keyboardEvents: KeyboardEvent[] = [
         <div
           v-for="(item, index) in keyboardEvents"
           :key="item.year + index"
+          :ref="(el) => { if (el) itemRefs[index] = el as HTMLElement }"
+          :data-index="index"
           class="timeline-item"
-          :class="index % 2 === 0 ? 'is-left' : 'is-right'"
+          :class="[
+            index % 2 === 0 ? 'is-left' : 'is-right',
+            { 'is-visible': visibleItems.has(index) },
+          ]"
         >
+          <!-- Year dot on center axis -->
           <div class="timeline-dot">
-            <span>{{ item.year }}</span>
+            <span class="dot-ring" />
+            <span class="dot-year">{{ item.year }}</span>
           </div>
 
+          <!-- Horizontal connector line -->
+          <div class="timeline-connector" />
+
+          <!-- Card -->
           <div class="timeline-card">
-            <h3 class="timeline-title">{{ item.title }}</h3>
+            <h3 class="timeline-title">
+              {{ item.title }}
+            </h3>
             <p class="timeline-desc">
               {{ item.desc }}
             </p>
 
+            <!-- Embla Carousel -->
             <div class="timeline-media">
-              <div
-                class="timeline-media-track"
-                :class="index % 2 === 0 ? 'track-left' : 'track-right'"
-              >
-                <!-- 为了实现无缝循环，拼接两遍 medias -->
-                <div
-                  v-for="(m, mIndex) in [...item.medias, ...item.medias]"
-                  :key="mIndex"
-                  class="timeline-media-item"
-                >
-                  <img
-                    v-if="m.type === 'image'"
-                    :src="m.src"
-                    :alt="item.title"
-                    loading="lazy"
+              <div :ref="(el) => { if (el) carousels[index].emblaRef.value = el as HTMLElement }" class="carousel-viewport">
+                <div class="carousel-container">
+                  <div
+                    v-for="(m, mIndex) in item.medias"
+                    :key="mIndex"
+                    class="carousel-slide"
                   >
-                  <video
-                    v-else
-                    :src="m.src"
-                    autoplay
-                    muted
-                    loop
-                    playsinline
-                  />
+                    <img
+                      v-if="m.type === 'image'"
+                      :src="m.src"
+                      :alt="`${item.title} - ${mIndex + 1}`"
+                      loading="lazy"
+                    >
+                    <video
+                      v-else
+                      :src="m.src"
+                      autoplay
+                      muted
+                      loop
+                      playsinline
+                    />
+                  </div>
                 </div>
+              </div>
+
+              <!-- Dot indicators -->
+              <div v-if="carousels[index].scrollSnaps.value.length > 1" class="carousel-dots">
+                <button
+                  v-for="(_, dotIndex) in carousels[index].scrollSnaps.value"
+                  :key="dotIndex"
+                  class="carousel-dot"
+                  :class="{ active: carousels[index].selectedIndex.value === dotIndex }"
+                  :aria-label="`Go to slide ${dotIndex + 1}`"
+                  @click="scrollTo(index, dotIndex)"
+                />
               </div>
             </div>
           </div>
@@ -119,31 +211,36 @@ const keyboardEvents: KeyboardEvent[] = [
 </template>
 
 <style lang="scss" scoped>
+/* ── Page ── */
 .timeline-page {
   position: relative;
-  padding: 2rem 0 3rem;
+  padding: 2rem 0 4rem;
   overflow: hidden;
 }
 
+/* ── Header ── */
 .timeline-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 
   h1 {
     font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
     margin-bottom: 0.5rem;
   }
 
   p {
     color: var(--c-text-2);
     font-size: 0.95rem;
+    letter-spacing: 0.01em;
   }
 }
 
-/* 外层包裹 + 中线 */
+/* ── Wrapper + center axis ── */
 .timeline-wrapper {
   position: relative;
-  max-width: 900px;
+  max-width: 960px;
   margin: 0 auto;
   padding: 1rem 0;
 }
@@ -157,161 +254,300 @@ const keyboardEvents: KeyboardEvent[] = [
   transform: translateX(-50%);
   background: linear-gradient(
     to bottom,
-    transparent,
-    var(--c-border),
-    transparent
+    transparent 0%,
+    var(--c-border) 8%,
+    var(--c-border) 92%,
+    transparent 100%
   );
-  opacity: 0.7;
 }
 
-/* 轨道：不再整体滚动，只做静态纵向布局 */
+/* ── Track ── */
 .timeline-track {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 3rem;
-  padding: 1rem 0 4rem;
+  gap: 3.5rem;
+  padding: 2rem 0 4rem;
 }
 
+/* ── Item ── */
 .timeline-item {
   position: relative;
   display: flex;
   align-items: flex-start;
+  /* Entrance animation initial state */
+  opacity: 0;
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
 }
 
-/* 左右分布 */
 .timeline-item.is-left {
   justify-content: flex-start;
+  transform: translateX(-30px);
 }
 
 .timeline-item.is-right {
   justify-content: flex-end;
+  transform: translateX(30px);
 }
 
-/* 时间圆点 + 年份 */
+.timeline-item.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── Dot on center axis ── */
 .timeline-dot {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  top: 0.6rem;
+  top: 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.4rem;
+  z-index: 2;
+}
 
-  &::before {
-    content: '';
-    width: 0.75rem;
-    height: 0.75rem;
-    border-radius: 999px;
-    background: var(--c-primary);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--c-primary) 20%, transparent);
+.dot-ring {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--c-primary);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--c-primary) 25%, transparent);
+  animation: pulse-glow 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--c-primary) 25%, transparent);
   }
-
-  span {
-    font-size: 0.8rem;
-    color: var(--c-text-2);
-    background-color: var(--c-bg-1);
-    padding: 0.1rem 0.4rem;
-    border-radius: 999px;
+  50% {
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--c-primary) 10%, transparent);
   }
 }
 
-/* 卡片本体 */
+.dot-year {
+  font-family: var(--font-monospace);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--c-primary);
+  background-color: var(--c-bg-1);
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--c-primary) 30%, transparent);
+  white-space: nowrap;
+}
+
+/* ── Connector line (dot → card) ── */
+.timeline-connector {
+  position: absolute;
+  top: calc(1rem + 6px); /* vertically center on dot */
+  height: 2px;
+  background: var(--c-border);
+  z-index: 1;
+}
+
+.timeline-item.is-left .timeline-connector {
+  left: calc(50% + 7px); /* start after dot */
+  right: calc(50% - 7px);
+  width: 40px;
+  /* Flip: connector goes from dot toward left card, but dot is center, card is left
+     Actually for left items, card is on the left side, so connector goes from card end to dot */
+  right: auto;
+  left: auto;
+  /* Position connector between card right edge and dot left edge */
+}
+
+/* For is-left: card is on the left, connector bridges from card to center dot */
+.timeline-item.is-left .timeline-connector {
+  right: calc(50% + 7px);
+  left: auto;
+  width: 0;
+  /* We'll use a simpler approach: place connector relative to the 50% axis */
+}
+
+/* Simpler approach: connector extends from the dot outward toward the card */
+.timeline-item .timeline-connector {
+  top: calc(1rem + 5px);
+  width: 36px;
+  height: 1px;
+  background: var(--c-border);
+}
+
+.timeline-item.is-left .timeline-connector {
+  right: 50%;
+  left: auto;
+  margin-right: 7px;
+}
+
+.timeline-item.is-right .timeline-connector {
+  left: 50%;
+  right: auto;
+  margin-left: 7px;
+}
+
+/* ── Card ── */
 .timeline-card {
   position: relative;
-  max-width: 360px;
-  padding: 1rem 1rem 1.2rem;
+  width: 420px;
+  max-width: calc(50% - 50px);
+  padding: 1.25rem;
   border-radius: 0.75rem;
-  background-color: var(--c-bg-1);
-  box-shadow: 0 6px 20px var(--ld-shadow-soft);
-  border: 1px solid var(--c-bg-soft);
+  background-color: var(--ld-bg-card);
+  box-shadow:
+    0 2px 8px color-mix(in srgb, var(--ld-shadow) 60%, transparent),
+    0 8px 24px color-mix(in srgb, var(--ld-shadow) 30%, transparent);
+  border: 1px solid var(--c-border);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow:
+      0 4px 12px color-mix(in srgb, var(--ld-shadow) 70%, transparent),
+      0 12px 32px color-mix(in srgb, var(--ld-shadow) 40%, transparent);
+  }
 }
 
 .timeline-item.is-left .timeline-card {
   margin-right: auto;
   margin-left: 0;
-  transform-origin: right center;
 }
 
 .timeline-item.is-right .timeline-card {
   margin-left: auto;
   margin-right: 0;
-  transform-origin: left center;
 }
 
 .timeline-title {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
+  font-weight: 600;
   margin-bottom: 0.4rem;
+  letter-spacing: -0.01em;
 }
 
 .timeline-desc {
   font-size: 0.9rem;
   color: var(--c-text-2);
-  margin-bottom: 0.6rem;
+  line-height: 1.6;
+  margin-bottom: 0.8rem;
 }
 
-/* 媒体区域：内部做水平循环滚动 */
+/* ── Carousel ── */
 .timeline-media {
-  overflow: hidden;
+  position: relative;
   border-radius: 0.6rem;
+  overflow: hidden;
   background-color: var(--c-bg-soft);
 }
 
-/* 媒体轨道：横向跑马灯 */
-.timeline-media-track {
-  display: flex;
-  gap: 0.5rem;
-  animation: media-scroll 20s linear infinite;
-}
-
-/* 左右两侧可以用不同方向，让视觉更有趣 */
-.timeline-media-track.track-left {
-  animation-direction: normal;
-}
-
-.timeline-media-track.track-right {
-  animation-direction: reverse;
-}
-
-.timeline-media-item {
-  flex: 0 0 auto;
-  width: 200px; /* 单个媒体宽度，可按实际改 */
-  border-radius: 0.5rem;
+.carousel-viewport {
   overflow: hidden;
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.carousel-container {
+  display: flex;
+}
+
+.carousel-slide {
+  flex: 0 0 100%;
+  min-width: 0;
 
   img,
   video {
     display: block;
     width: 100%;
-    height: 120px;
+    height: 180px;
     object-fit: cover;
   }
 }
 
-@keyframes media-scroll {
-  0% {
-    transform: translateX(0);
+/* Dot indicators */
+.carousel-dots {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.35rem;
+  z-index: 3;
+}
+
+.carousel-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  border: none;
+  padding: 0;
+  background: color-mix(in srgb, var(--c-text) 30%, transparent);
+  cursor: pointer;
+  transition: all 0.25s ease;
+
+  &.active {
+    width: 18px;
+    background: var(--c-primary);
   }
-  100% {
-    transform: translateX(-50%);
+
+  &:hover:not(.active) {
+    background: color-mix(in srgb, var(--c-text) 50%, transparent);
   }
 }
 
+/* ── Mobile: single-column left-axis layout ── */
 @media (max-width: 768px) {
+  .timeline-line {
+    left: 20px;
+  }
+
+  .timeline-dot {
+    left: 20px;
+  }
+
+  .timeline-connector {
+    display: none;
+  }
+
+  .timeline-item.is-left,
+  .timeline-item.is-right {
+    justify-content: flex-end;
+  }
+
+  /* Reset entrance animation direction for mobile */
+  .timeline-item.is-left,
+  .timeline-item.is-right {
+    transform: translateX(20px);
+  }
+
+  .timeline-item.is-visible {
+    transform: translateX(0);
+  }
+
   .timeline-card {
-    max-width: 90vw;
+    width: auto;
+    max-width: calc(100% - 56px);
+    margin-left: 48px !important;
+    margin-right: 0 !important;
+  }
+
+  .timeline-item.is-left .timeline-card,
+  .timeline-item.is-right .timeline-card {
+    margin-left: 48px;
+    margin-right: 0;
   }
 
   .timeline-track {
-    gap: 2.2rem;
+    gap: 2.5rem;
   }
 
-  .timeline-media-item {
-    width: 160px;
+  .carousel-slide {
     img,
     video {
-      height: 100px;
+      height: 140px;
     }
   }
 }
