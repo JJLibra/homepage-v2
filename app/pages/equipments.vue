@@ -653,7 +653,7 @@ const stats = computed(() => ({
       </h1>
       <p class="kb-hero__subtitle">每一把键盘都是一段故事，记录从入坑到深陷的客制化之旅。</p>
 
-      <div class="kb-stats" aria-label="统计">
+      <div class="kb-stats" aria-label="��计">
         <div class="kb-stat">
           <span class="kb-stat__number">{{ stats.total }}</span>
           <span class="kb-stat__label">TOTAL</span>
@@ -1337,6 +1337,7 @@ const stats = computed(() => ({
 .carousel-slide img {
   -webkit-user-drag: none;
   user-drag: none;
+  pointer-events: none;
 }
 
 .carousel-slide:not(.is-active) .carousel-slide__inner {
@@ -1766,14 +1767,21 @@ const stats = computed(() => ({
   position: relative;
 }
 
-.detail-viewport { padding: 0.85rem 0; }
+.detail-viewport {
+  padding: 0.85rem 0;
+  touch-action: pan-y pinch-zoom;
+}
 .detail-slide { flex: 0 0 80%; }
 .detail-inner img, .detail-inner video {
   height: 340px;
   width: 100%;
   object-fit: cover;
 }
-.detail-inner img { -webkit-user-drag: none; user-drag: none; }
+.detail-inner img {
+  -webkit-user-drag: none;
+  user-drag: none;
+  pointer-events: none;
+}
 
 /* ──── Nav Arrows ──── */
 .nav-arrows {
