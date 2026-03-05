@@ -18,6 +18,7 @@ interface KeyboardEntry {
   desc: string
   medias: KeyboardMedia[]
   featured?: boolean
+  layout?: string | null
 }
 
 interface KeyboardEntryVM extends KeyboardEntry {
@@ -48,14 +49,6 @@ function formatDate(input: string): string {
   return y
 }
 
-function extractLayoutTag(title: string): string | null {
-  const m = title.match(/(\d{2,3})\s*(?:%|cu|v\d|V\d|\b)/)
-  if (!m) return null
-  const n = Number(m[1])
-  if (!Number.isFinite(n) || n < 40 || n > 110) return null
-  return String(n)
-}
-
 function isTypingTarget(el: Element | null) {
   if (!el) return false
   const tag = (el as HTMLElement).tagName?.toLowerCase()
@@ -75,6 +68,7 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     date: '2026-02-23',
     title: 'TKD Pt.1/75 阳极枪灰',
     desc: 'TKD孝子这块儿，不必多说，入手的第六把Pt.1/75，这个系列算是毕业了，留下这把和不锈钢。',
+    layout: '75',
     featured: true,
     medias: [
       { src: 'https://placehold.co/600x400?text=KB3-1', type: 'image' },
@@ -86,6 +80,7 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     date: '2026-02-20',
     title: 'TKD Pt.1/75 不锈钢展会限定',
     desc: '关注Pt.1/75那么久，终于看到了一把合适的不锈钢展会版本，好东西收收收！',
+    layout: '75',
     featured: true,
     medias: [
       { src: 'https://placehold.co/600x400?text=KB3-1', type: 'image' },
@@ -97,6 +92,7 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     date: '2025-11-23',
     title: 'TKD Pt.1/75 不锈钢R2',
     desc: '很喜欢，和一个老哥相互劝着赶了这趟车。等待了40天的工期，终于收到了货，之后找一个厂子做个阳极。',
+    layout: '75',
     medias: [
       { src: 'https://placehold.co/600x400?text=KB3-1', type: 'image' },
       { src: 'https://placehold.co/600x400?text=KB3-2', type: 'image' },
@@ -107,6 +103,7 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     date: '2025-10-23',
     title: 'TKD Pt.1/75 阳极粉',
     desc: '又看到了阳极，收一把回来拿拿味儿...',
+    layout: '75',
     medias: [
       { src: 'https://placehold.co/600x400?text=KB3-1', type: 'image' },
       { src: 'https://placehold.co/600x400?text=KB3-2', type: 'image' },
@@ -117,6 +114,7 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     date: '2025-10-13',
     title: 'TKD Pt.1/75 阳极奥数紫',
     desc: '终于等到了一把好价阳极色，收！可惜不是长春花蓝，这个紫色偏玫红色，但无伤大雅。',
+    layout: '75',
     medias: [
       { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
       { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
@@ -127,6 +125,7 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     date: '2025-10-04',
     title: 'TKD Pt.1/75 喷涂帆布蓝',
     desc: '最近关注到了TKD的Pt.1/75，在无棉top里好像评价很高，奈何阳极很难收到，先收一把喷涂帆布蓝回来把玩一下。',
+    layout: '75',
     medias: [
       { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
       { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
@@ -138,6 +137,7 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     title: 'Neo 75cu 阳极灰金',
     desc: '如愿以偿，收到了阳极灰金，也不太打算除掉了，唯一配合bcp轴和pbt声音是舒服的。',
     featured: true,
+    layout: '75',
     medias: [
       { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
       { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
@@ -148,6 +148,7 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     date: '2025-08-30',
     title: 'Neo Ergo 喷涂复古白',
     desc: '第一把Alice，我的评价是外观确实帅的，但需要时间适应，不然老要按错键()',
+    layout: 'Alice',
     medias: [
       { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
       { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
@@ -158,6 +159,7 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     date: '2025-08-19',
     title: 'Neo 75cu 阳极深蓝',
     desc: '看了老卡的视频，又上头了，等了一个月还没有想要的灰金，先收一把阳极深蓝吧。',
+    layout: '75',
     medias: [
       { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
       { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
@@ -169,6 +171,7 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     title: 'GDK dk1-60 阳极流光暗金',
     desc: '第一把hhkb，这把终于算撞到了，收藏了，这个颜色配置应该算是绝版了，冲冲冲。',
     featured: true,
+    layout: '60',
     medias: [
       { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
       { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
@@ -179,6 +182,7 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     date: '2025-07-07',
     title: 'Neo 60cu 阳极银',
     desc: '第一把60配列wkl，Neo同一时期的两把cu凑齐了算是，翻过来看真的好帅。',
+    layout: '60',
     medias: [
       { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
       { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
@@ -190,6 +194,7 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     title: 'Neo 65cu 阳极酒红',
     desc: '正式入门客制化，千元铜底套件，这个腰线很戳我。整体很有质感，还一直收藏着，时不时拿出来玩玩。',
     featured: true,
+    layout: '65',
     medias: [
       { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
       { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
@@ -200,6 +205,7 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     date: '2025-06-18',
     title: 'ROG 满改夜魔X',
     desc: '游戏界谁人不知ROG，试试这种电竞类键盘怎么样。最初是被他的改色计划吸引的，但是还是忍住了哈哈哈。',
+    layout: '75',
     medias: [
       { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
       { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
@@ -210,6 +216,7 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     date: '2025-06-11',
     title: '维咖 lucky65v2 阳极海棠紫',
     desc: '偶尔买点亲民的小玩具，yysy不错的，日常使用随便造了。',
+    layout: '65',
     medias: [
       { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
       { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
@@ -220,6 +227,7 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     date: '2025-06-10',
     title: 'Nape taku65 阳极山竹紫',
     desc: '第一把65配列，Nape家的taku65不必多说了，千元可玩性很高的套件，只是一直没有想要的山竹紫，最近遇到了，那只能狠狠拿下了。',
+    layout: '65',
     medias: [
       { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
       { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
@@ -230,6 +238,7 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     date: '2025-06-04',
     title: 'Buff 80r2 阳极咖',
     desc: '第一把80配列，闷包套件实至名归，没毛病，8.21斤的重量，质感拉满了，每天的健身器材有了()',
+    layout: '80',
     featured: true,
     medias: [
       { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
@@ -241,6 +250,7 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     date: '2025-06-02',
     title: 'Evo 80 阳极砂金',
     desc: '没想到不到半个月就开始铝坨坨了，先从千元内最具性价比的套件入门！！！',
+    layout: '80',
     medias: [
       { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
       { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
@@ -251,6 +261,7 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     date: '2025-05-27',
     title: '迈从 x75v2',
     desc: '看看量产头部企业的实力奥，我的评价是挺好的。',
+    layout: '75',
     medias: [
       { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
       { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
@@ -261,6 +272,7 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     date: '2025-05-13',
     title: '珂芝 98v2',
     desc: '入坑机械键盘，从薄膜键盘正式毕业。导火索：大创经费还剩一点，打算用掉买一把胶坨坨机械键盘，不用白不用。',
+    layout: '98',
     medias: [
       { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
       { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
@@ -279,7 +291,7 @@ const keyboardEvents: KeyboardEntryVM[] = [...rawKeyboardEvents]
       ts,
       year: y,
       dateLabel: formatDate(e.date),
-      layoutTag: extractLayoutTag(e.title),
+      layoutTag: e.layout ?? null,
     }
   })
   .sort((a, b) => b.ts - a.ts)
@@ -386,6 +398,15 @@ const q = ref('')
 const layout = ref<'all' | string>('all')
 const year = ref<'all' | string>('all')
 
+const yearOpen = ref(false)
+const layoutOpen = ref(false)
+
+const yearSelectRef = ref<HTMLElement | null>(null)
+const layoutSelectRef = ref<HTMLElement | null>(null)
+
+const yearLabel = computed(() => (year.value === 'all' ? '年份' : year.value))
+const layoutLabel = computed(() => (layout.value === 'all' ? '配列' : `${layout.value}%`))
+
 const pageSize = 24
 const visibleCount = ref(pageSize)
 
@@ -419,6 +440,44 @@ const canLoadMore = computed(() => playedShown.value.length < playedFiltered.val
 function loadMore() {
   visibleCount.value = Math.min(visibleCount.value + pageSize, playedFiltered.value.length)
 }
+
+function toggleYearDropdown() {
+  yearOpen.value = !yearOpen.value
+  if (yearOpen.value) layoutOpen.value = false
+}
+
+function toggleLayoutDropdown() {
+  layoutOpen.value = !layoutOpen.value
+  if (layoutOpen.value) yearOpen.value = false
+}
+
+function selectYear(val: 'all' | string) {
+  year.value = val
+  yearOpen.value = false
+}
+
+function selectLayout(val: 'all' | string) {
+  layout.value = val
+  layoutOpen.value = false
+}
+
+function handleClickOutsideDropdown(e: MouseEvent) {
+  const target = e.target as Node | null
+  if (yearSelectRef.value && target && !yearSelectRef.value.contains(target)) {
+    yearOpen.value = false
+  }
+  if (layoutSelectRef.value && target && !layoutSelectRef.value.contains(target)) {
+    layoutOpen.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutsideDropdown)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutsideDropdown)
+})
 
 const filterKey = computed(() => `${q.value.trim().toLowerCase()}|${layout.value}|${year.value}`)
 watch(filterKey, () => {
@@ -740,7 +799,9 @@ const stats = computed(() => ({
             <div class="meta-top">
               <span class="badge">FEATURED</span>
               <span class="chip">{{ item.dateLabel }}</span>
-              <span v-if="item.layoutTag" class="chip chip-strong">{{ item.layoutTag }}%</span>
+              <span v-if="item.layoutTag" class="chip chip-strong">
+                {{ isNaN(Number(item.layoutTag)) ? item.layoutTag : `${item.layoutTag}%` }}
+              </span>
             </div>
 
             <h3 class="title">{{ item.title }}</h3>
@@ -774,18 +835,96 @@ const stats = computed(() => ({
           </div>
 
           <div class="select-group">
-            <div class="select">
-              <select v-model="year" aria-label="年份筛选">
-                <option value="all">全部年份</option>
-                <option v-for="opt in yearOptions" :key="opt" :value="opt">{{ opt }}</option>
-              </select>
+            <div
+              ref="yearSelectRef"
+              class="select select--custom"
+            >
+              <button
+                type="button"
+                class="select-trigger"
+                :aria-expanded="yearOpen"
+                aria-haspopup="listbox"
+                aria-label="年份筛选"
+                @click.stop="toggleYearDropdown"
+              >
+                <span class="select-trigger__label">{{ yearLabel }}</span>
+              </button>
+              <Transition name="select-pop">
+                <ul
+                  v-if="yearOpen"
+                  class="select-menu"
+                  role="listbox"
+                >
+                  <li
+                    id="year-opt-all"
+                    class="select-option"
+                    :class="{ 'is-active': year === 'all' }"
+                    role="option"
+                    aria-selected="year === 'all'"
+                    @click.stop="selectYear('all')"
+                  >
+                    全部
+                  </li>
+                  <li
+                    v-for="opt in yearOptions"
+                    :key="opt"
+                    :id="`year-opt-${opt}`"
+                    class="select-option"
+                    :class="{ 'is-active': year === opt }"
+                    role="option"
+                    :aria-selected="year === opt"
+                    @click.stop="selectYear(opt)"
+                  >
+                    {{ opt }}
+                  </li>
+                </ul>
+              </Transition>
             </div>
 
-            <div class="select">
-              <select v-model="layout" aria-label="布局筛选">
-                <option value="all">全部配列</option>
-                <option v-for="opt in layoutOptions" :key="opt" :value="opt">{{ opt }}%</option>
-              </select>
+            <div
+              ref="layoutSelectRef"
+              class="select select--custom"
+            >
+              <button
+                type="button"
+                class="select-trigger"
+                :aria-expanded="layoutOpen"
+                aria-haspopup="listbox"
+                aria-label="布局筛选"
+                @click.stop="toggleLayoutDropdown"
+              >
+                <span class="select-trigger__label">{{ layoutLabel }}</span>
+              </button>
+              <Transition name="select-pop">
+                <ul
+                  v-if="layoutOpen"
+                  class="select-menu"
+                  role="listbox"
+                >
+                  <li
+                    id="layout-opt-all"
+                    class="select-option"
+                    :class="{ 'is-active': layout === 'all' }"
+                    role="option"
+                    aria-selected="layout === 'all'"
+                    @click.stop="selectLayout('all')"
+                  >
+                    全部
+                  </li>
+                  <li
+                    v-for="opt in layoutOptions"
+                    :key="opt"
+                    :id="`layout-opt-${opt}`"
+                    class="select-option"
+                    :class="{ 'is-active': layout === opt }"
+                    role="option"
+                    :aria-selected="layout === opt"
+                    @click.stop="selectLayout(opt)"
+                  >
+                    {{ opt }}%
+                  </li>
+                </ul>
+              </Transition>
             </div>
           </div>
         </div>
@@ -831,7 +970,9 @@ const stats = computed(() => ({
           <div class="wf-body">
             <div class="wf-top">
               <span class="wf-chip">{{ item.dateLabel }}</span>
-              <span v-if="item.layoutTag" class="wf-chip wf-chip-strong">{{ item.layoutTag }}%</span>
+              <span v-if="item.layoutTag" class="wf-chip wf-chip-strong">
+                {{ isNaN(Number(item.layoutTag)) ? item.layoutTag : `${item.layoutTag}%` }}
+              </span>
             </div>
 
             <h3 class="wf-title">{{ item.title }}</h3>
@@ -875,7 +1016,9 @@ const stats = computed(() => ({
                 <div class="drawer-head__meta">
                   <span class="badge badge-soft">DETAIL</span>
                   <span v-if="detailItem?.dateLabel" class="chip">{{ detailItem.dateLabel }}</span>
-                  <span v-if="detailItem?.layoutTag" class="chip chip-strong">{{ detailItem.layoutTag }}%</span>
+                  <span v-if="detailItem?.layoutTag" class="chip chip-strong">
+                    {{ isNaN(Number(detailItem.layoutTag)) ? detailItem.layoutTag : `${detailItem.layoutTag}%` }}
+                  </span>
                   <span v-if="detailItem && detailCanAutoplay" class="chip chip-auto">AUTO</span>
                 </div>
 
@@ -1032,15 +1175,16 @@ const stats = computed(() => ({
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(900px 450px at 15% -12%, color-mix(in srgb, var(--c-primary) 10%, transparent), transparent 60%),
-    radial-gradient(800px 350px at 85% -5%, color-mix(in srgb, var(--c-primary) 6%, transparent), transparent 55%);
+    radial-gradient(1000px 500px at 10% -15%, color-mix(in srgb, var(--c-primary) 12%, transparent), transparent 55%),
+    radial-gradient(800px 400px at 90% -8%, color-mix(in srgb, var(--c-primary) 7%, transparent), transparent 50%),
+    radial-gradient(600px 600px at 50% 60%, color-mix(in srgb, var(--c-primary) 3%, transparent), transparent 70%);
   opacity: 1;
 }
 
 /* ──── Hero ──── */
 .kb-hero {
   max-width: 1100px;
-  margin: 0 auto 2.5rem;
+  margin: 0 auto 3rem;
   padding: 0 1.25rem;
   text-align: center;
   position: relative;
@@ -1049,21 +1193,32 @@ const stats = computed(() => ({
 
 .kb-hero__eyebrow {
   font-family: var(--font-monospace);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--c-primary);
-  margin-bottom: 1rem;
+  margin-bottom: 1.2rem;
   animation: fadeIn 600ms 200ms ease both;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  &::before,
+  &::after {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: color-mix(in srgb, var(--c-primary) 40%, transparent);
+  }
 }
 
 .kb-hero__title {
-  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-size: clamp(2.4rem, 5.5vw, 4rem);
   font-weight: 900;
-  letter-spacing: -0.04em;
-  line-height: 1.1;
-  margin: 0 0 1rem;
+  letter-spacing: -0.045em;
+  line-height: 1.08;
+  margin: 0 0 1.2rem;
 }
 .kb-hero__title-line {
   display: block;
@@ -1075,31 +1230,32 @@ const stats = computed(() => ({
 
 .kb-hero__subtitle {
   margin: 0 auto;
-  max-width: 48ch;
+  max-width: 44ch;
   color: var(--c-text-2);
   line-height: 1.8;
-  font-size: 0.95rem;
+  font-size: 0.93rem;
   animation: fadeIn 600ms 300ms ease both;
 }
 
 .kb-stats {
-  margin-top: 2rem;
+  margin-top: 2.2rem;
   display: inline-flex;
   align-items: center;
   gap: 0;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--c-border) 60%, transparent);
-  background: color-mix(in srgb, var(--c-bg-1) 60%, transparent);
-  backdrop-filter: blur(12px);
-  padding: 0.65rem 1.5rem;
+  border: 1px solid color-mix(in srgb, var(--c-border) 50%, transparent);
+  background: color-mix(in srgb, var(--c-bg-1) 55%, transparent);
+  backdrop-filter: blur(14px);
+  padding: 0.7rem 1.6rem;
   animation: fadeUp 600ms 400ms ease both;
+  box-shadow: 0 2px 16px color-mix(in srgb, var(--c-text) 4%, transparent);
 }
 
 .kb-stat {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.15rem;
+  gap: 0.18rem;
   padding: 0 1.2rem;
 }
 .kb-stat__number {
@@ -1115,16 +1271,16 @@ const stats = computed(() => ({
 }
 .kb-stat__label {
   font-family: var(--font-monospace);
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--c-text-3);
 }
 .kb-stat__divider {
   width: 1px;
   height: 2.2rem;
-  background: color-mix(in srgb, var(--c-border) 60%, transparent);
+  background: color-mix(in srgb, var(--c-border) 50%, transparent);
   flex-shrink: 0;
 }
 
@@ -1180,24 +1336,24 @@ const stats = computed(() => ({
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
   gap: 1.5rem;
-  padding: 1.25rem;
-  border-radius: 1.4rem;
-  border: 1px solid color-mix(in srgb, var(--c-border) 50%, transparent);
-  background: color-mix(in srgb, var(--c-bg-1) 55%, transparent);
-  backdrop-filter: blur(16px);
+  padding: 1.35rem 1.5rem;
+  border-radius: 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--c-border) 65%, transparent);
+  background: color-mix(in srgb, var(--c-bg-1) 92%, transparent);
   box-shadow:
-    0 1px 2px color-mix(in srgb, var(--c-text) 4%, transparent),
-    0 12px 48px color-mix(in srgb, var(--c-text) 6%, transparent);
+    0 0 0 1px color-mix(in srgb, var(--c-border) 6%, transparent),
+    0 8px 26px color-mix(in srgb, var(--c-text) 4%, transparent);
+  position: relative;
 
-  transition: transform 280ms cubic-bezier(.16,1,.3,1), border-color 200ms ease, box-shadow 280ms ease;
+  transition: box-shadow 260ms ease, background-color 200ms ease, filter 200ms ease;
   animation: fadeUp 600ms calc(var(--i, 0) * 80ms + 400ms) cubic-bezier(.16,1,.3,1) both;
 
   &:hover {
-    transform: translateY(-3px);
-    border-color: color-mix(in srgb, var(--c-primary) 28%, var(--c-border));
+    background: color-mix(in srgb, var(--c-bg-1) 98%, transparent);
+    filter: contrast(0.96);
     box-shadow:
-      0 1px 2px color-mix(in srgb, var(--c-text) 4%, transparent),
-      0 20px 64px color-mix(in srgb, var(--c-text) 10%, transparent);
+      0 0 0 1px color-mix(in srgb, var(--c-border) 6%, transparent),
+      0 10px 32px color-mix(in srgb, var(--c-text) 7%, transparent);
   }
   &:focus-visible {
     outline: 2px solid color-mix(in srgb, var(--c-primary) 55%, transparent);
@@ -1274,18 +1430,28 @@ const stats = computed(() => ({
 .meta-foot .hint {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  font-size: 0.75rem;
+  gap: 0.4rem;
+  font-size: 0.74rem;
+  font-weight: 500;
   color: var(--c-text-3);
-  svg { opacity: 0.7; }
+  transition: color 200ms ease;
+  svg {
+    opacity: 0.6;
+    transition: transform 200ms ease, opacity 200ms ease;
+  }
+}
+.main-card:hover .meta-foot .hint {
+  color: var(--c-primary);
+  svg { opacity: 1; transform: translateX(2px); }
 }
 
 .carousel {
   position: relative;
-  border-radius: 1.1rem;
+  border-radius: 1.15rem;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--c-border) 45%, transparent);
-  background: color-mix(in srgb, var(--c-bg-2) 80%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c-border) 35%, transparent);
+  background: color-mix(in srgb, var(--c-bg-2) 70%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--c-bg) 30%, transparent);
 }
 
 .carousel-viewport {
@@ -1374,9 +1540,9 @@ const stats = computed(() => ({
   padding: 0 1.25rem;
 }
 .played-head {
-  margin: 2.5rem 0 1.2rem;
+  margin: 3rem 0 1.4rem;
   display: grid;
-  gap: 1rem;
+  gap: 1.1rem;
 }
 .played-head__top {
   display: flex;
@@ -1387,41 +1553,57 @@ const stats = computed(() => ({
 .played-head__title-group {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.2rem;
   h2 {
     margin: 0;
-    font-size: 1.3rem;
+    font-size: 1.35rem;
     font-weight: 950;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
     color: var(--c-text);
   }
 }
 .played-head__en {
   font-family: var(--font-monospace);
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 600;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--c-primary);
 }
 
 .played-count {
   font-family: var(--font-monospace);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--c-text-2);
-  border: 1px solid color-mix(in srgb, var(--c-border) 50%, transparent);
-  background: color-mix(in srgb, var(--c-bg-1) 60%, transparent);
-  padding: 0.25rem 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--c-border) 45%, transparent);
+  background: color-mix(in srgb, var(--c-bg-1) 50%, transparent);
+  padding: 0.28rem 0.7rem;
   border-radius: 999px;
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 1px 6px color-mix(in srgb, var(--c-text) 3%, transparent);
 }
 
 .filters {
   display: flex;
-  gap: 0.65rem;
+  gap: 0.6rem;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: stretch;
+  --ctrl-h: 2.7rem;
+  --ctrl-r: 999px;
+  --ctrl-border: color-mix(in srgb, var(--c-border) 52%, transparent);
+  --ctrl-bg: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--c-bg-1) 82%, transparent),
+    color-mix(in srgb, var(--c-bg-1) 58%, transparent)
+  );
+  --ctrl-bg-hover: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--c-bg-1) 92%, transparent),
+    color-mix(in srgb, var(--c-bg-1) 68%, transparent)
+  );
+  --ctrl-shadow: 0 1px 8px color-mix(in srgb, var(--c-text) 5%, transparent);
+  --ctrl-shadow-hover: 0 10px 26px color-mix(in srgb, var(--c-text) 10%, transparent);
 }
 .search {
   position: relative;
@@ -1435,21 +1617,39 @@ const stats = computed(() => ({
   transform: translateY(-50%);
   color: var(--c-text-3);
   pointer-events: none;
+  transition: color 200ms ease;
+}
+.search:focus-within .search-icon {
+  color: var(--c-primary);
 }
 .search input {
   width: 100%;
-  padding: 0.7rem 0.85rem 0.7rem 2.5rem;
-  border-radius: 0.9rem;
-  border: 1px solid color-mix(in srgb, var(--c-border) 50%, transparent);
-  background: color-mix(in srgb, var(--c-bg-1) 60%, transparent);
-  backdrop-filter: blur(8px);
+  box-sizing: border-box;
+  height: var(--ctrl-h);
+  padding: 0.65rem 0.85rem 0.65rem 2.5rem;
+  border-radius: var(--ctrl-r);
+  border: 1px solid var(--ctrl-border);
+  background: var(--ctrl-bg);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--ctrl-shadow);
   color: var(--c-text);
   outline: none;
-  font-size: 0.88rem;
-  transition: border-color 200ms ease, box-shadow 200ms ease;
+  font-size: 0.86rem;
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    background 200ms ease;
+  &:hover {
+    background: var(--ctrl-bg-hover);
+    box-shadow: var(--ctrl-shadow-hover);
+  }
+  &:active {
+    box-shadow: var(--ctrl-shadow);
+  }
   &:focus {
-    border-color: color-mix(in srgb, var(--c-primary) 45%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 10%, transparent);
+    border-color: color-mix(in srgb, var(--c-primary) 35%, var(--c-border));
+    box-shadow: var(--ctrl-shadow-hover);
+    background: var(--ctrl-bg-hover);
   }
   &::placeholder { color: var(--c-text-3); }
 }
@@ -1457,18 +1657,190 @@ const stats = computed(() => ({
   display: flex;
   gap: 0.5rem;
 }
-.select select {
-  padding: 0.7rem 0.85rem;
-  border-radius: 0.9rem;
-  border: 1px solid color-mix(in srgb, var(--c-border) 50%, transparent);
-  background: color-mix(in srgb, var(--c-bg-1) 60%, transparent);
-  backdrop-filter: blur(8px);
+.select {
+  position: relative;
+  border-radius: var(--ctrl-r);
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(120% 140% at 20% 0%, color-mix(in srgb, var(--c-primary) 16%, transparent), transparent 55%);
+    transition: opacity 220ms ease;
+  }
+  &::after {
+    content: '';
+    position: absolute;
+    right: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1rem;
+    height: 1rem;
+    background-color: var(--c-text-3);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center / 100%;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center / 100%;
+    pointer-events: none;
+    transition: background-color 200ms ease, transform 220ms cubic-bezier(.16,1,.3,1);
+  }
+  &:hover::after {
+    background-color: var(--c-primary);
+  }
+  &:focus-within::after {
+    background-color: var(--c-primary);
+    transform: translateY(-50%) rotate(180deg);
+  }
+  &:hover::before,
+  &:focus-within::before {
+    opacity: 1;
+  }
+}
+.select--custom {
+  min-width: 7.5rem;
+}
+.select-trigger {
+  width: 100%;
+  box-sizing: border-box;
+  height: var(--ctrl-h);
+  padding: 0.65rem 2.4rem 0.65rem 0.95rem;
+  border-radius: inherit;
+  border: 1px solid var(--ctrl-border);
+  background: var(--ctrl-bg);
+  backdrop-filter: blur(10px);
+  box-shadow:
+    var(--ctrl-shadow),
+    inset 0 1px 0 color-mix(in srgb, var(--c-bg-0) 30%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--c-text) 6%, transparent);
   color: var(--c-text);
-  font-size: 0.85rem;
+  font-size: 0.86rem;
+  font-weight: 500;
+  font-family: inherit;
+  line-height: 1.15;
   cursor: pointer;
-  transition: border-color 200ms ease;
+  outline: none;
+  background-clip: padding-box;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.25rem;
+  transition:
+    transform 220ms cubic-bezier(.16,1,.3,1),
+    border-color 200ms ease,
+    box-shadow 220ms cubic-bezier(.16,1,.3,1),
+    background 200ms ease;
+}
+.select-trigger__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.select--custom:hover .select-trigger {
+  background: var(--ctrl-bg-hover);
+  box-shadow: var(--ctrl-shadow-hover);
+}
+.select--custom:active .select-trigger {
+  box-shadow: var(--ctrl-shadow);
+}
+.select-menu {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  min-width: max(100%, 7.5rem);
+  padding: 0.4rem;
+  border-radius: 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--c-border) 60%, transparent);
+  background:
+    radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--c-primary) 10%, transparent), transparent 55%),
+    color-mix(in srgb, var(--c-bg-1) 88%, transparent);
+  backdrop-filter: blur(14px);
+  box-shadow:
+    0 18px 40px color-mix(in srgb, var(--c-text) 22%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--c-bg-0) 45%, transparent);
+  list-style: none;
+  margin: 0;
+  max-height: 13rem;
+  overflow: auto;
+}
+.select-option {
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--c-text-2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  transition: background 160ms ease, color 160ms ease;
+}
+.select-option::after {
+  content: '';
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: 0 0 0 0 transparent;
+  transition: background 180ms ease, box-shadow 180ms ease;
+}
+.select-option:hover {
+  background: color-mix(in srgb, var(--c-primary) 10%, transparent);
+  color: var(--c-text);
+}
+.select-option.is-active {
+  background: color-mix(in srgb, var(--c-primary) 18%, transparent);
+  color: var(--c-text);
+}
+.select-option.is-active::after {
+  background: var(--c-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 35%, transparent);
+}
+.select-pop-enter-active,
+.select-pop-leave-active {
+  transition: transform 200ms cubic-bezier(.16,1,.3,1), opacity 200ms ease;
+  transform-origin: top center;
+}
+.select-pop-enter-from,
+.select-pop-leave-to {
+  opacity: 0;
+  transform: translateY(-4px) scale(0.97);
+}
+.select select {
+  appearance: none;
+  -webkit-appearance: none;
+  box-sizing: border-box;
+  height: var(--ctrl-h);
+  padding: 0.65rem 2.6rem 0.65rem 0.95rem;
+  border-radius: var(--ctrl-r);
+  border: 1px solid var(--ctrl-border);
+  background: var(--ctrl-bg);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--ctrl-shadow);
+  color: var(--c-text);
+  font-size: 0.86rem;
+  font-weight: 500;
+  font-family: inherit;
+  line-height: 1.15;
+  cursor: pointer;
+  outline: none;
+  background-clip: padding-box;
+  transition:
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    background 200ms ease;
   &:hover {
-    border-color: color-mix(in srgb, var(--c-primary) 30%, var(--c-border));
+    background: var(--ctrl-bg-hover);
+    box-shadow: var(--ctrl-shadow-hover);
+  }
+  &:active {
+    box-shadow: var(--ctrl-shadow);
+  }
+  &:focus {
+    border-color: color-mix(in srgb, var(--c-primary) 35%, var(--c-border));
+    box-shadow: var(--ctrl-shadow-hover);
+    background: var(--ctrl-bg-hover);
   }
 }
 
@@ -1484,34 +1856,33 @@ const stats = computed(() => ({
   text-align: left;
   break-inside: avoid;
   margin: 0 0 1.1rem;
-  border-radius: 1.15rem;
+  border-radius: 0.9rem;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--c-border) 45%, transparent);
-  background: color-mix(in srgb, var(--c-bg-1) 55%, transparent);
-  backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in srgb, var(--c-border) 60%, transparent);
+  background: color-mix(in srgb, var(--c-bg-1) 92%, transparent);
   box-shadow:
-    0 1px 2px color-mix(in srgb, var(--c-text) 3%, transparent),
-    0 8px 32px color-mix(in srgb, var(--c-text) 5%, transparent);
+    0 1px 2px color-mix(in srgb, var(--c-text) 2%, transparent),
+    0 10px 28px color-mix(in srgb, var(--c-text) 5%, transparent);
   cursor: pointer;
 
   opacity: 0;
-  transform: translateY(16px) scale(0.98);
+  transform: translateY(20px);
   transition:
-    opacity 500ms ease,
-    transform 500ms cubic-bezier(.16,1,.3,1),
+    opacity 550ms ease,
+    transform 550ms cubic-bezier(.16,1,.3,1),
     border-color 200ms ease,
-    box-shadow 280ms ease;
+    box-shadow 300ms ease;
   transition-delay: var(--d, 0ms);
 
   &.is-visible {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
     &:hover {
-      transform: translateY(-3px) scale(1);
-      border-color: color-mix(in srgb, var(--c-primary) 25%, var(--c-border));
+      background: color-mix(in srgb, var(--c-bg-1) 98%, transparent);
+      filter: contrast(0.96);
       box-shadow:
-        0 1px 2px color-mix(in srgb, var(--c-text) 3%, transparent),
-        0 16px 48px color-mix(in srgb, var(--c-text) 8%, transparent);
+        0 1px 2px color-mix(in srgb, var(--c-text) 2%, transparent),
+        0 20px 56px color-mix(in srgb, var(--c-text) 8%, transparent);
     }
   }
 }
@@ -1545,24 +1916,30 @@ const stats = computed(() => ({
   inset: 0;
   display: grid;
   place-items: center;
-  background: color-mix(in srgb, var(--c-bg) 55%, transparent);
-  backdrop-filter: blur(4px);
+  background: color-mix(in srgb, var(--c-bg) 50%, transparent);
+  backdrop-filter: blur(6px);
   opacity: 0;
-  transition: opacity 250ms ease;
+  transition: opacity 280ms ease;
 }
 .wf-card.is-visible:hover .wf-cover__overlay { opacity: 1; }
 .wf-view {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--c-text);
-  border: 1px solid color-mix(in srgb, var(--c-border) 60%, transparent);
-  background: color-mix(in srgb, var(--c-bg) 80%, transparent);
-  padding: 0.4rem 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--c-border) 50%, transparent);
+  background: color-mix(in srgb, var(--c-bg) 85%, transparent);
+  padding: 0.42rem 0.85rem;
   border-radius: 999px;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--c-text) 8%, transparent);
+  transform: translateY(4px);
+  transition: transform 280ms cubic-bezier(.16,1,.3,1);
+}
+.wf-card.is-visible:hover .wf-view {
+  transform: translateY(0);
 }
 
 .wf-body {
@@ -1619,21 +1996,28 @@ const stats = computed(() => ({
 .btn-load {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.72rem 1.2rem;
+  gap: 0.5rem;
+  padding: 0.75rem 1.4rem;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--c-border) 50%, transparent);
-  background: color-mix(in srgb, var(--c-bg-1) 60%, transparent);
-  backdrop-filter: blur(8px);
+  border: 1px solid color-mix(in srgb, var(--c-border) 45%, transparent);
+  background: color-mix(in srgb, var(--c-bg-1) 50%, transparent);
+  backdrop-filter: blur(10px);
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   font-weight: 600;
   color: var(--c-text);
-  transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+  transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease, background 200ms ease;
   &:hover {
     transform: translateY(-2px);
-    border-color: color-mix(in srgb, var(--c-primary) 25%, var(--c-border));
-    box-shadow: 0 8px 24px color-mix(in srgb, var(--c-text) 6%, transparent);
+    border-color: color-mix(in srgb, var(--c-primary) 30%, var(--c-border));
+    background: color-mix(in srgb, var(--c-primary) 5%, var(--c-bg-1));
+    box-shadow: 0 8px 28px color-mix(in srgb, var(--c-text) 6%, transparent);
+  }
+  svg {
+    transition: transform 200ms ease;
+  }
+  &:hover svg {
+    transform: translateY(2px);
   }
 }
 
