@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue'
 import Autoplay from 'embla-carousel-autoplay'
 import emblaCarouselVue from 'embla-carousel-vue'
+import EmblaCarousel, { type EmblaCarouselType } from 'embla-carousel'
 
 useHead({ title: '键盘' })
 definePageMeta({ headerText: '我的键盘墙' })
@@ -68,14 +69,6 @@ async function waitTwoFrames() {
   await new Promise<void>(r => requestAnimationFrame(() => r()))
 }
 
-async function waitForEmblaApi(apiRef: Ref<any>, maxFrames = 90) {
-  for (let i = 0; i < maxFrames; i++) {
-    const api = apiRef.value
-    if (api) return api
-    await new Promise<void>(r => requestAnimationFrame(() => r()))
-  }
-  return null
-}
 
 const rawKeyboardEvents: KeyboardEntry[] = [
   {
@@ -471,19 +464,48 @@ const detailItem = ref<KeyboardEntryVM | null>(null)
 const lastActiveEl = ref<HTMLElement | null>(null)
 const closeBtnRef = ref<HTMLButtonElement | null>(null)
 
-const detailCarousel = makeCarousel({
-  autoplay: true,
-  stopOnInteraction: true,
-  stopOnMouseEnter: false,
-})
-
-const detailEmblaRef = detailCarousel.emblaRef
+// Detail carousel — managed manually via EmblaCarousel to avoid v-if/Transition timing issues
+const detailEmblaRef = ref<HTMLElement | null>(null)
+let detailEmblaApi: EmblaCarouselType | null = null
+const detailSelectedIndex = ref(0)
+const detailScrollSnaps = ref<number[]>([])
 
 const detailHasVideo = computed(() => (detailItem.value?.medias ?? []).some(m => m.type === 'video'))
 const detailCanAutoplay = computed(() => {
   const medias = detailItem.value?.medias ?? []
   return medias.length > 1 && !detailHasVideo.value
 })
+
+function destroyDetailEmbla() {
+  if (detailEmblaApi) {
+    getAutoplay(detailEmblaApi)?.stop?.()
+    detailEmblaApi.destroy()
+    detailEmblaApi = null
+  }
+  detailSelectedIndex.value = 0
+  detailScrollSnaps.value = []
+}
+
+function initDetailEmbla() {
+  destroyDetailEmbla()
+  const el = detailEmblaRef.value
+  if (!el) return
+
+  const plugins: any[] = detailCanAutoplay.value
+    ? [Autoplay({ delay: 3800, stopOnInteraction: true, stopOnMouseEnter: false })]
+    : []
+
+  detailEmblaApi = EmblaCarousel(el, { loop: true, align: 'center', skipSnaps: false }, plugins)
+
+  const updateSelected = () => { detailSelectedIndex.value = detailEmblaApi!.selectedScrollSnap() }
+  const updateSnaps = () => {
+    detailScrollSnaps.value = detailEmblaApi!.scrollSnapList()
+    updateSelected()
+  }
+  updateSnaps()
+  detailEmblaApi.on('select', updateSelected)
+  detailEmblaApi.on('reInit', updateSnaps)
+}
 
 function openDetail(item: KeyboardEntryVM) {
   lastActiveEl.value = document.activeElement as HTMLElement | null
@@ -496,54 +518,28 @@ function closeDetail() {
 }
 
 function detailPrev() {
-  const api = detailCarousel.emblaApi.value as EmblaApiLike
-  if (!api) return
-  api.scrollPrev()
-  getAutoplay(api)?.reset?.()
+  if (!detailEmblaApi) return
+  detailEmblaApi.scrollPrev()
+  getAutoplay(detailEmblaApi)?.reset?.()
 }
 
 function detailNext() {
-  const api = detailCarousel.emblaApi.value as EmblaApiLike
-  if (!api) return
-  api.scrollNext()
-  getAutoplay(api)?.reset?.()
+  if (!detailEmblaApi) return
+  detailEmblaApi.scrollNext()
+  getAutoplay(detailEmblaApi)?.reset?.()
 }
 
 function scrollToSlideDetail(snapIndex: number) {
-  const api = detailCarousel.emblaApi.value as EmblaApiLike
-  if (!api) return
-  api.scrollTo(snapIndex)
-  getAutoplay(api)?.reset?.()
-}
-
-let detailSyncToken = 0
-async function syncDetailEmbla(resetIndex = true) {
-  const token = ++detailSyncToken
-
-  await nextTick()
-  await waitTwoFrames()
-  if (token !== detailSyncToken) return
-
-  const api = await waitForEmblaApi(detailCarousel.emblaApi)
-  if (!api) return
-
-  api.reInit?.()
-
-  await waitTwoFrames()
-  if (token !== detailSyncToken) return
-
-  if (resetIndex) api.scrollTo(0, true)
-
-  const autoplay = getAutoplay(api)
-  if (autoplay) {
-    if (detailCanAutoplay.value) autoplay.play?.()
-    else autoplay.stop?.()
-  }
+  if (!detailEmblaApi) return
+  detailEmblaApi.scrollTo(snapIndex)
+  getAutoplay(detailEmblaApi)?.reset?.()
 }
 
 async function onDetailAfterEnter() {
   if (!detailOpen.value) return
-  await syncDetailEmbla(false)
+  await nextTick()
+  await waitTwoFrames()
+  initDetailEmbla()
 }
 
 watch(
@@ -552,18 +548,12 @@ watch(
     if (open) {
       document.documentElement.classList.add('kb-lock')
       document.body.classList.add('kb-lock')
-
-      await syncDetailEmbla(true)
+      // Embla init is deferred to onDetailAfterEnter (after Transition completes)
       closeBtnRef.value?.focus?.()
     } else {
       document.documentElement.classList.remove('kb-lock')
       document.body.classList.remove('kb-lock')
-
-      detailSyncToken++
-
-      const api = detailCarousel.emblaApi.value as EmblaApiLike
-      getAutoplay(api)?.stop?.()
-
+      destroyDetailEmbla()
       await nextTick()
       lastActiveEl.value?.focus?.()
     }
@@ -576,7 +566,9 @@ watch(
   async (id, prev) => {
     if (!detailOpen.value) return
     if (!id || id === prev) return
-    await syncDetailEmbla(true)
+    await nextTick()
+    await waitTwoFrames()
+    initDetailEmbla()
   },
   { flush: 'post' },
 )
@@ -630,6 +622,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeydown)
   mainAutoplayObserver?.disconnect()
   wfObserver?.disconnect()
+  destroyDetailEmbla()
 })
 
 const stats = computed(() => ({
@@ -912,16 +905,16 @@ const stats = computed(() => ({
                   <div class="drawer-carousel">
                     <div
                       ref="detailEmblaRef"
-                      class="carousel-viewport detail-viewport"
+                      class="detail-viewport"
                     >
-                      <div class="carousel-container">
+                      <div class="detail-container">
                         <div
                           v-for="(m, mIndex) in detailItem.medias"
                           :key="mIndex"
-                          class="carousel-slide detail-slide"
-                          :class="{ 'is-active': detailCarousel.selectedIndex.value === mIndex }"
+                          class="detail-slide"
+                          :class="{ 'is-active': detailSelectedIndex === mIndex }"
                         >
-                          <div class="carousel-slide__inner detail-inner">
+                          <div class="detail-inner">
                             <img
                               v-if="m.type === 'image'"
                               :src="m.src"
@@ -941,7 +934,7 @@ const stats = computed(() => ({
                       </div>
                     </div>
 
-                    <div v-if="detailCarousel.scrollSnaps.value.length > 1" class="nav-arrows">
+                    <div v-if="detailScrollSnaps.length > 1" class="nav-arrows">
                       <button class="nav-btn prev" type="button" aria-label="上一张" @click="detailPrev">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                       </button>
@@ -950,12 +943,12 @@ const stats = computed(() => ({
                       </button>
                     </div>
 
-                    <div v-if="detailCarousel.scrollSnaps.value.length > 1" class="carousel-dots">
+                    <div v-if="detailScrollSnaps.length > 1" class="carousel-dots">
                       <button
-                        v-for="(_, dotIndex) in detailCarousel.scrollSnaps.value"
+                        v-for="(_, dotIndex) in detailScrollSnaps"
                         :key="dotIndex"
                         class="carousel-dot"
-                        :class="{ active: detailCarousel.selectedIndex.value === dotIndex }"
+                        :class="{ active: detailSelectedIndex === dotIndex }"
                         :aria-label="`Go to slide ${dotIndex + 1}`"
                         @click="scrollToSlideDetail(dotIndex)"
                       />
@@ -967,7 +960,7 @@ const stats = computed(() => ({
                       v-for="(m, i) in detailItem.medias"
                       :key="i"
                       class="thumb"
-                      :class="{ active: detailCarousel.selectedIndex.value === i }"
+                      :class="{ active: detailSelectedIndex === i }"
                       type="button"
                       :aria-label="`查看第 ${i + 1} 张`"
                       @click="scrollToSlideDetail(i)"
@@ -1663,20 +1656,22 @@ const stats = computed(() => ({
   display: grid;
   place-items: center;
   padding: 1.5rem;
-  background: color-mix(in srgb, #000 50%, transparent);
-  backdrop-filter: blur(12px);
+  background: color-mix(in srgb, #000 55%, transparent);
+  backdrop-filter: blur(16px) saturate(1.2);
   overscroll-behavior: contain;
 }
 .drawer {
   width: min(1100px, 96vw);
   max-height: calc(100vh - 3rem);
-  border-radius: 1.4rem;
-  border: 1px solid color-mix(in srgb, var(--c-border) 40%, transparent);
-  background: color-mix(in srgb, var(--c-bg) 94%, transparent);
-  backdrop-filter: blur(20px);
+  border-radius: 1.6rem;
+  border: 1px solid color-mix(in srgb, var(--c-border) 30%, transparent);
+  background: color-mix(in srgb, var(--c-bg) 96%, transparent);
+  backdrop-filter: blur(24px);
   box-shadow:
-    0 1px 2px rgba(0,0,0,0.1),
-    0 32px 120px rgba(0,0,0,0.35);
+    0 0 0 1px color-mix(in srgb, var(--c-border) 10%, transparent),
+    0 1px 3px rgba(0,0,0,0.08),
+    0 8px 32px rgba(0,0,0,0.12),
+    0 32px 120px rgba(0,0,0,0.3);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -1687,10 +1682,9 @@ const stats = computed(() => ({
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.9rem 1.1rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--c-border) 40%, transparent);
-  backdrop-filter: blur(12px);
-  background: color-mix(in srgb, var(--c-bg) 70%, transparent);
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--c-border) 30%, transparent);
+  background: color-mix(in srgb, var(--c-bg) 80%, transparent);
 }
 .drawer-head__meta {
   display: flex;
@@ -1700,19 +1694,20 @@ const stats = computed(() => ({
 }
 
 .icon-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 0.85rem;
-  border: 1px solid color-mix(in srgb, var(--c-border) 50%, transparent);
-  background: color-mix(in srgb, var(--c-bg-1) 60%, transparent);
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--c-border) 45%, transparent);
+  background: color-mix(in srgb, var(--c-bg-1) 50%, transparent);
   cursor: pointer;
   display: grid;
   place-items: center;
-  transition: transform 200ms ease, border-color 200ms ease, background 200ms ease;
-  color: var(--c-text-2);
+  transition: transform 200ms ease, border-color 200ms ease, background 200ms ease, color 200ms ease;
+  color: var(--c-text-3);
   &:hover {
-    transform: scale(1.05);
-    border-color: color-mix(in srgb, var(--c-primary) 30%, var(--c-border));
+    transform: scale(1.08);
+    border-color: color-mix(in srgb, var(--c-primary) 35%, var(--c-border));
+    background: color-mix(in srgb, var(--c-primary) 8%, transparent);
     color: var(--c-text);
   }
 }
@@ -1721,61 +1716,98 @@ const stats = computed(() => ({
   flex: 1 1 auto;
   overflow: auto;
   display: grid;
-  grid-template-columns: 0.9fr 1.1fr;
-  gap: 1.25rem;
-  padding: 1.25rem;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
 }
 .drawer-left {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
 }
 .drawer-title {
   margin: 0;
-  font-size: 1.35rem;
+  font-size: 1.5rem;
   font-weight: 950;
-  letter-spacing: -0.03em;
-  line-height: 1.2;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
   color: var(--c-text);
+  text-wrap: balance;
 }
 .drawer-desc {
   margin: 0;
   color: var(--c-text-2);
-  line-height: 1.8;
-  font-size: 0.92rem;
+  line-height: 1.85;
+  font-size: 0.93rem;
 }
 .drawer-note {
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  font-size: 0.75rem;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  font-family: var(--font-monospace);
   color: var(--c-text-3);
-  border: 1px solid color-mix(in srgb, var(--c-border) 40%, transparent);
-  padding: 0.55rem 0.75rem;
-  border-radius: 0.85rem;
-  background: color-mix(in srgb, var(--c-bg-1) 50%, transparent);
-  svg { flex-shrink: 0; opacity: 0.6; }
+  border: 1px solid color-mix(in srgb, var(--c-border) 30%, transparent);
+  padding: 0.6rem 0.85rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--c-bg-1) 40%, transparent);
+  svg { flex-shrink: 0; opacity: 0.5; }
 }
 
 .drawer-carousel {
-  border-radius: 1.1rem;
-  border: 1px solid color-mix(in srgb, var(--c-border) 45%, transparent);
-  background: color-mix(in srgb, var(--c-bg-2) 70%, transparent);
+  border-radius: 1.2rem;
+  border: 1px solid color-mix(in srgb, var(--c-border) 35%, transparent);
+  background: color-mix(in srgb, var(--c-bg-2) 60%, transparent);
   overflow: hidden;
   position: relative;
 }
 
 .detail-viewport {
+  overflow: hidden;
+  cursor: grab;
+  position: relative;
   padding: 0.85rem 0;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
   touch-action: pan-y pinch-zoom;
+  &:active { cursor: grabbing; }
 }
-.detail-slide { flex: 0 0 80%; }
+.detail-container {
+  display: flex;
+  align-items: stretch;
+  margin-left: -14px;
+}
+.detail-slide {
+  flex: 0 0 80%;
+  min-width: 0;
+  padding-left: 14px;
+  box-sizing: border-box;
+}
+.detail-inner {
+  border-radius: 0.85rem;
+  overflow: hidden;
+  transition: opacity 300ms ease, transform 300ms cubic-bezier(.16,1,.3,1);
+  will-change: transform, opacity;
+}
+.detail-slide:not(.is-active) .detail-inner {
+  opacity: 0.5;
+  transform: scale(0.95);
+}
+.detail-slide:not(.is-active) .detail-inner img,
+.detail-slide:not(.is-active) .detail-inner video {
+  filter: blur(4px) saturate(0.6);
+  transform: scale(1.03);
+}
 .detail-inner img, .detail-inner video {
   height: 340px;
   width: 100%;
   object-fit: cover;
+  display: block;
+  transition: filter 300ms ease, transform 300ms ease;
 }
 .detail-inner img {
   -webkit-user-drag: none;
@@ -1791,34 +1823,36 @@ const stats = computed(() => ({
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 0.5rem;
+  padding: 0 0.65rem;
   z-index: 2;
 }
 .nav-btn {
   pointer-events: auto;
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--c-border) 50%, transparent);
-  background: color-mix(in srgb, var(--c-bg) 75%, transparent);
-  backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in srgb, var(--c-border) 40%, transparent);
+  background: color-mix(in srgb, var(--c-bg) 80%, transparent);
+  backdrop-filter: blur(16px);
   cursor: pointer;
   display: grid;
   place-items: center;
   color: var(--c-text);
-  transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
-  opacity: 0.95;
+  transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease, background 200ms ease, opacity 200ms ease;
+  opacity: 0;
+  .drawer-carousel:hover & { opacity: 1; }
 
   &:hover {
-    transform: scale(1.08);
-    border-color: color-mix(in srgb, var(--c-primary) 30%, var(--c-border));
-    box-shadow: 0 4px 16px color-mix(in srgb, var(--c-text) 8%, transparent);
+    transform: scale(1.1);
+    border-color: color-mix(in srgb, var(--c-primary) 35%, var(--c-border));
+    background: color-mix(in srgb, var(--c-primary) 8%, var(--c-bg));
+    box-shadow: 0 4px 20px color-mix(in srgb, var(--c-text) 10%, transparent);
   }
 }
 
 /* ──── Thumbs ──── */
 .thumbs {
-  margin-top: 0.75rem;
+  margin-top: 0.85rem;
   display: flex;
   gap: 0.5rem;
   overflow-x: auto;
@@ -1828,20 +1862,25 @@ const stats = computed(() => ({
 }
 .thumb {
   flex: 0 0 auto;
-  width: 84px;
-  height: 56px;
-  border-radius: 0.7rem;
+  width: 80px;
+  height: 54px;
+  border-radius: 0.65rem;
   overflow: hidden;
   border: 2px solid transparent;
   background: color-mix(in srgb, var(--c-bg-2) 80%, transparent);
   cursor: pointer;
-  transition: transform 200ms ease, border-color 200ms ease;
+  transition: transform 200ms ease, border-color 200ms ease, opacity 200ms ease, box-shadow 200ms ease;
+  opacity: 0.6;
 
   img { width: 100%; height: 100%; object-fit: cover; display: block; -webkit-user-drag: none; user-drag: none; }
-  &:hover { transform: translateY(-2px); }
+  &:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+  }
   &.active {
+    opacity: 1;
     border-color: var(--c-primary);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--c-primary) 20%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 18%, transparent);
   }
 }
 .thumb-video {
@@ -1849,23 +1888,24 @@ const stats = computed(() => ({
   height: 100%;
   display: grid;
   place-items: center;
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-family: var(--font-monospace);
   font-weight: 600;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--c-text-3);
 }
 
 /* ──── Transitions ──── */
 .mask-fade-enter-active,
-.mask-fade-leave-active { transition: opacity 220ms ease; }
+.mask-fade-leave-active { transition: opacity 280ms ease; }
 .mask-fade-enter-from,
 .mask-fade-leave-to { opacity: 0; }
 
-.modal-pop-enter-active { transition: transform 280ms cubic-bezier(.16,1,.3,1), opacity 280ms ease; }
-.modal-pop-leave-active { transition: transform 180ms ease, opacity 180ms ease; }
-.modal-pop-enter-from { transform: translateY(16px) scale(0.97); opacity: 0; }
-.modal-pop-leave-to { transform: translateY(10px) scale(0.98); opacity: 0; }
+.modal-pop-enter-active { transition: transform 320ms cubic-bezier(.16,1,.3,1), opacity 320ms ease; }
+.modal-pop-leave-active { transition: transform 200ms ease, opacity 200ms ease; }
+.modal-pop-enter-from { transform: translateY(20px) scale(0.96); opacity: 0; }
+.modal-pop-leave-to { transform: translateY(12px) scale(0.97); opacity: 0; }
 
 /* ──── Responsive ──── */
 @media (max-width: 980px) {
@@ -1876,6 +1916,7 @@ const stats = computed(() => ({
   .detail-inner img, .detail-inner video { height: 280px; }
   .kb-stat { padding: 0 0.8rem; }
   .kb-stat__number { font-size: 1.25rem; }
+  .nav-btn { opacity: 1; }
 }
 @media (max-width: 640px) {
   .kb-page { padding: 2rem 0 3rem; }
@@ -1888,8 +1929,11 @@ const stats = computed(() => ({
   .select-group { width: 100%; }
   .select-group .select { flex: 1; }
   .select-group .select select { width: 100%; }
-  .thumb { width: 74px; height: 50px; }
+  .thumb { width: 68px; height: 46px; }
   .filters { gap: 0.5rem; }
+  .drawer { border-radius: 1.2rem; }
+  .drawer-body { padding: 1rem; gap: 1rem; }
+  .drawer-title { font-size: 1.25rem; }
 }
 
 /* ──── Reduce motion ──── */
