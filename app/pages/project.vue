@@ -6,12 +6,12 @@ const projects = [
 	{
 		title: 'willow-god/Friend-Circle-Lite',
 		github: 'willow-god/Friend-Circle-Lite',
-		description: '🐱一个精简版，无后端，且仅利用github action运行的精简版友链朋友圈程序，兼容fc的json格式信息。',
+		description: '🐱一个精简版，无后端，且仅利用github action运行的精简版友链朋友圈程序，兼容fc的json格式信息',
 	},
 	{
 		title: 'Astar-qt',
 		github: 'JJLibra/Astar-qt',
-		description: '✌️一个基于 Astar 算法的无人机路径规划演示程序，使用 QT 框架实现。',
+		description: '✌️一个基于 Astar 算法的无人机路径规划演示程序，使用 QT 框架实现',
 	},
 	{
 		title: 'SALAD-Pan',
