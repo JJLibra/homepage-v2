@@ -36,6 +36,7 @@ interface SwitchEntry {
   sound: string
   tags: string[]
   note: string
+  audio?: string
 }
 
 type DetailThumbSlot =
@@ -450,7 +451,8 @@ const playedSwitches = ref<SwitchEntry[]>([
     profile: '高回弹 / 偏硬底',
     sound: '脆 / 集中',
     tags: ['经典混轴', '高上桌率'],
-    note: '适合做一把有“收束感”的声音取向，和铜底、PBT 的组合很容易出高级感。',
+    note: '适合做一把有"收束感"的声音取向，和铜底、PBT 的组合很容易出高级感。',
+    audio: '/audio/bcp-switch.mp3',
   },
   {
     name: 'HMX 云岚',
@@ -513,6 +515,35 @@ const switchStats = computed(() => {
     types: Array.from(bucket.entries()).map(([type, count]) => ({ type, count })),
   }
 })
+
+// Switch audio playback
+const playingSwitchAudio = ref<string | null>(null)
+let switchAudioInstance: HTMLAudioElement | null = null
+
+function toggleSwitchAudio(item: SwitchEntry) {
+  if (!item.audio) return
+
+  if (playingSwitchAudio.value === item.name) {
+    switchAudioInstance?.pause()
+    switchAudioInstance = null
+    playingSwitchAudio.value = null
+    return
+  }
+
+  if (switchAudioInstance) {
+    switchAudioInstance.pause()
+    switchAudioInstance = null
+  }
+
+  switchAudioInstance = new Audio(item.audio)
+  switchAudioInstance.play()
+  playingSwitchAudio.value = item.name
+
+  switchAudioInstance.addEventListener('ended', () => {
+    playingSwitchAudio.value = null
+    switchAudioInstance = null
+  })
+}
 
 type EmblaApiLike = any
 
@@ -1443,23 +1474,54 @@ const stats = computed(() => ({
             class="switch-item"
           >
             <span class="switch-item__index">{{ String(idx + 1).padStart(2, '0') }}</span>
-            <div class="switch-item__main">
-              <div class="switch-item__header">
-                <h3 class="switch-item__name">{{ item.name }}</h3>
-                <span class="switch-item__type" :class="`switch-item__type--${item.type}`">{{ item.type }}</span>
+            <div class="switch-item__content">
+              <div class="switch-item__left">
+                <div class="switch-item__header">
+                  <h3 class="switch-item__name">{{ item.name }}</h3>
+                  <span class="switch-item__type" :class="`switch-item__type--${item.type}`">{{ item.type }}</span>
+                </div>
               </div>
-              <div class="switch-item__meta">
-                <span class="switch-item__trait">{{ item.profile }}</span>
-                <span class="switch-item__divider" />
-                <span class="switch-item__trait">{{ item.sound }}</span>
-                <template v-if="item.tags.length">
+              <div class="switch-item__right">
+                <div class="switch-item__meta">
+                  <span class="switch-item__trait">{{ item.profile }}</span>
                   <span class="switch-item__divider" />
-                  <span
-                    v-for="tag in item.tags"
-                    :key="tag"
-                    class="switch-item__tag"
-                  >{{ tag }}</span>
-                </template>
+                  <span class="switch-item__trait">{{ item.sound }}</span>
+                  <template v-if="item.tags.length">
+                    <span class="switch-item__divider" />
+                    <span
+                      v-for="tag in item.tags"
+                      :key="tag"
+                      class="switch-item__tag"
+                    >{{ tag }}</span>
+                  </template>
+                </div>
+                <button
+                  v-if="item.audio"
+                  class="switch-item__audio-btn"
+                  :aria-label="`播放 ${item.name} 轴体音效`"
+                  @click="toggleSwitchAudio(item)"
+                >
+                  <svg
+                    v-if="playingSwitchAudio !== item.name"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                  <svg
+                    v-else
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                  </svg>
+                </button>
               </div>
             </div>
           </li>
@@ -2770,20 +2832,32 @@ const stats = computed(() => ({
 .switch-item__index {
   flex-shrink: 0;
   font-family: var(--font-monospace);
-  font-size: 1.5rem;
-  font-weight: 200;
-  letter-spacing: -0.06em;
-  color: color-mix(in srgb, var(--c-text) 25%, transparent);
+  font-size: 1.75rem;
+  font-weight: 300;
+  font-style: italic;
+  letter-spacing: -0.08em;
+  color: color-mix(in srgb, var(--c-text) 20%, transparent);
   width: 2.5rem;
   text-align: right;
 }
 
-.switch-item__main {
+.switch-item__content {
   flex: 1;
   min-width: 0;
   display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.switch-item__left {
+  flex-shrink: 0;
+}
+
+.switch-item__right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .switch-item__header {
@@ -2854,6 +2928,30 @@ const stats = computed(() => ({
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--c-text-3);
+}
+
+.switch-item__audio-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--c-primary) 12%, transparent);
+  color: var(--c-primary);
+  cursor: pointer;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.switch-item__audio-btn:hover {
+  background: color-mix(in srgb, var(--c-primary) 20%, transparent);
+  transform: scale(1.08);
+}
+
+.switch-item__audio-btn:active {
+  transform: scale(0.95);
 }
 
 .drawer-mask {
@@ -3317,12 +3415,25 @@ const stats = computed(() => ({
 
   .switch-item {
     padding: 0.9rem 1rem;
-    gap: 1rem;
+    gap: 0.85rem;
+    align-items: flex-start;
   }
 
   .switch-item__index {
-    font-size: 1.25rem;
-    width: 2rem;
+    font-size: 1.35rem;
+    width: 1.75rem;
+    padding-top: 0.15rem;
+  }
+
+  .switch-item__content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .switch-item__right {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .switch-item__name {
@@ -3335,6 +3446,11 @@ const stats = computed(() => ({
 
   .switch-item__trait {
     font-size: 0.75rem;
+  }
+
+  .switch-item__audio-btn {
+    width: 1.75rem;
+    height: 1.75rem;
   }
 
   .switch-stats__total {
