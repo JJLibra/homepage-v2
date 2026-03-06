@@ -29,6 +29,15 @@ interface KeyboardEntryVM extends KeyboardEntry {
   layoutTag: string | null
 }
 
+interface SwitchEntry {
+  name: string
+  type: string
+  profile: string
+  sound: string
+  tags: string[]
+  note: string
+}
+
 type DetailThumbSlot =
   | { type: 'index'; key: string; index: number; media: KeyboardMedia }
   | { type: 'ellipsis'; key: string }
@@ -37,6 +46,7 @@ type DetailThumbSlot =
 const DATE_RE = /^(\d{4})(?:-(\d{1,2})(?:-(\d{1,2}))?)?$/
 const PAGE_SIZE = 24
 const DETAIL_THUMB_SLOT_COUNT = 7
+const DETAIL_AUTOPLAY_DELAY = 4200
 
 function parseDateParts(input: string) {
   const m = input.match(DATE_RE)
@@ -87,6 +97,30 @@ async function waitTwoFrames() {
 }
 
 const rawKeyboardEvents: KeyboardEntry[] = [
+  {
+    date: '2026-03-05',
+    title: 'Snake 60 Fossil Edition',
+    desc: '蛇年的礼物，没赶上车，只能在二手市场收了一把全新未拆的hhkb。好贵好贵，到手欣赏了一晚上，最终还是决定出掉，很不舍，但理性最终获胜了。',
+    layout: '60',
+    medias: [
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa47331e49d.webp', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa4732c0f42.webp', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa473331a15.webp', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa4733a7c80.webp', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa473863ecf.webp', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa473905eaa.webp', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa4739aa71b.webp', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa473a245a7.webp', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa473398e5d.webp', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa4734d84d6.webp', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa4735266e1.webp', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa473612865.webp', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa4736ca86a.webp', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa47374e702.webp', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa4737b66dd.webp', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa47383eef9.webp', type: 'image' },
+    ],
+  },
   {
     date: '2026-02-23',
     title: 'TKD Pt.1/75 阳极枪灰',
@@ -409,6 +443,77 @@ const mainKeyboards: KeyboardEntryVM[] = (() => {
 const mainIds = new Set(mainKeyboards.map(e => e.id))
 const playedAll: KeyboardEntryVM[] = keyboardEvents.filter(e => !mainIds.has(e.id))
 
+const playedSwitches = ref<SwitchEntry[]>([
+  {
+    name: 'BCP',
+    type: '线性',
+    profile: '高回弹 / 偏硬底',
+    sound: '脆 / 集中',
+    tags: ['经典混轴', '高上桌率'],
+    note: '适合做一把有“收束感”的声音取向，和铜底、PBT 的组合很容易出高级感。',
+  },
+  {
+    name: 'HMX 云岚',
+    type: '线性',
+    profile: '顺滑 / 干净',
+    sound: '偏亮',
+    tags: ['轻快', '量产友好'],
+    note: '手感很轻盈，适合日常高频打字，整体听感比较利落。',
+  },
+  {
+    name: 'TTC 金粉 V2',
+    type: '段落',
+    profile: '轻段落 / 快触发',
+    sound: '清亮',
+    tags: ['经典', '易上手'],
+    note: '想要段落感但又不想太累手时，这类轴一直很稳。',
+  },
+  {
+    name: '佳达隆 油王',
+    type: '线性',
+    profile: '顺滑 / 沉稳',
+    sound: '偏闷',
+    tags: ['老牌线性', '容错高'],
+    note: '不是最炸裂的那种类型，但搭配宽容度高，很多板子都能压得住。',
+  },
+  {
+    name: 'KTT 草莓',
+    type: '线性',
+    profile: '软弹 / 轻压',
+    sound: '甜脆',
+    tags: ['性价比', '轻松向'],
+    note: '更偏轻松耐玩的路数，适合拿来感受不同声音走向。',
+  },
+  {
+    name: 'WS Morandi',
+    type: '线性',
+    profile: '绵密 / 扎实',
+    sound: '偏沉',
+    tags: ['厚实', '耐听'],
+    note: '如果你追求更厚一点、更稳一点的声音，Morandi 这类风格通常很合适。',
+  },
+  {
+    name: '冰静轴',
+    type: '静音',
+    profile: '柔和 / 缓冲明显',
+    sound: '低存在感',
+    tags: ['办公室', '夜间友好'],
+    note: '属于功能性很强的轴，声音控制比较明显，适合特定使用场景。',
+  },
+])
+
+const switchStats = computed(() => {
+  const bucket = new Map<string, number>()
+  playedSwitches.value.forEach((item) => {
+    bucket.set(item.type, (bucket.get(item.type) ?? 0) + 1)
+  })
+
+  return {
+    total: playedSwitches.value.length,
+    types: Array.from(bucket.entries()).map(([type, count]) => ({ type, count })),
+  }
+})
+
 type EmblaApiLike = any
 
 interface CarouselInstance {
@@ -645,13 +750,26 @@ const closeBtnRef = ref<HTMLButtonElement | null>(null)
 
 const detailEmblaRef = ref<HTMLElement | null>(null)
 let detailEmblaApi: EmblaCarouselType | null = null
+
 const detailSelectedIndex = ref(0)
 const detailScrollSnaps = ref<number[]>([])
+const detailAutoplayPlaying = ref(false)
+const detailAutoplayPausedByUser = ref(false)
 
 const detailHasVideo = computed(() => (detailItem.value?.medias ?? []).some(m => m.type === 'video'))
 const detailCanAutoplay = computed(() => {
   const medias = detailItem.value?.medias ?? []
   return medias.length > 1 && !detailHasVideo.value
+})
+
+const detailCountLabel = computed(() => {
+  const total = detailItem.value?.medias.length ?? 0
+  return total ? `${detailSelectedIndex.value + 1} / ${total}` : '0 / 0'
+})
+
+const detailAutoplayStatusLabel = computed(() => {
+  if (!detailCanAutoplay.value) return ''
+  return detailAutoplayPausedByUser.value ? 'AUTO OFF' : 'AUTO ON'
 })
 
 function makeIndexSlot(index: number, media: KeyboardMedia): DetailThumbSlot {
@@ -736,14 +854,67 @@ const detailThumbSlots = computed<DetailThumbSlot[]>(() => {
   return slots
 })
 
+function syncDetailAutoplayState() {
+  if (!detailEmblaApi || !detailCanAutoplay.value) {
+    detailAutoplayPlaying.value = false
+    return
+  }
+
+  const autoplay = getAutoplay(detailEmblaApi)
+  detailAutoplayPlaying.value = !!autoplay?.isPlaying?.()
+}
+
+function playDetailAutoplay(options: { reset?: boolean; force?: boolean } = {}) {
+  if (!detailEmblaApi || !detailCanAutoplay.value) return
+  if (!options.force && detailAutoplayPausedByUser.value) return
+
+  const autoplay = getAutoplay(detailEmblaApi)
+  if (!autoplay) return
+
+  autoplay.play?.()
+  if (options.reset ?? true) autoplay.reset?.()
+  detailAutoplayPlaying.value = true
+}
+
+function stopDetailAutoplay(options: { byUser?: boolean } = {}) {
+  if (!detailEmblaApi) return
+
+  const autoplay = getAutoplay(detailEmblaApi)
+  autoplay?.stop?.()
+  detailAutoplayPlaying.value = false
+
+  if (options.byUser) {
+    detailAutoplayPausedByUser.value = true
+  }
+}
+
+function handleDetailCarouselMouseEnter() {
+  if (!detailEmblaApi || !detailCanAutoplay.value) return
+  if (detailAutoplayPausedByUser.value) return
+
+  const autoplay = getAutoplay(detailEmblaApi)
+  autoplay?.stop?.()
+  detailAutoplayPlaying.value = false
+}
+
+function handleDetailCarouselMouseLeave() {
+  if (!detailEmblaApi || !detailCanAutoplay.value) return
+  if (detailAutoplayPausedByUser.value) return
+
+  playDetailAutoplay({ reset: true })
+}
+
 function destroyDetailEmbla() {
   if (detailEmblaApi) {
     getAutoplay(detailEmblaApi)?.stop?.()
     detailEmblaApi.destroy()
     detailEmblaApi = null
   }
+
   detailSelectedIndex.value = 0
   detailScrollSnaps.value = []
+  detailAutoplayPlaying.value = false
+  detailAutoplayPausedByUser.value = false
 }
 
 function initDetailEmbla() {
@@ -751,8 +922,18 @@ function initDetailEmbla() {
   const el = detailEmblaRef.value
   if (!el) return
 
+  detailAutoplayPausedByUser.value = false
+
   const plugins: any[] = detailCanAutoplay.value
-    ? [Autoplay({ delay: 3800, stopOnInteraction: true, stopOnMouseEnter: false })]
+    ? [
+        Autoplay({
+          delay: DETAIL_AUTOPLAY_DELAY,
+          stopOnInteraction: false,
+          stopOnMouseEnter: false,
+          stopOnFocusIn: false,
+          playOnInit: true,
+        }),
+      ]
     : []
 
   detailEmblaApi = EmblaCarousel(el, { loop: true, align: 'center', skipSnaps: false }, plugins)
@@ -760,14 +941,34 @@ function initDetailEmbla() {
   const updateSelected = () => {
     detailSelectedIndex.value = detailEmblaApi!.selectedScrollSnap()
   }
+
   const updateSnaps = () => {
     detailScrollSnaps.value = detailEmblaApi!.scrollSnapList()
     updateSelected()
+    syncDetailAutoplayState()
   }
 
   updateSnaps()
   detailEmblaApi.on('select', updateSelected)
   detailEmblaApi.on('reInit', updateSnaps)
+
+  if (detailCanAutoplay.value) {
+    requestAnimationFrame(() => {
+      playDetailAutoplay({ reset: false, force: true })
+      syncDetailAutoplayState()
+    })
+  }
+}
+
+function toggleDetailAutoplay() {
+  if (!detailEmblaApi || !detailCanAutoplay.value) return
+
+  if (detailAutoplayPausedByUser.value) {
+    detailAutoplayPausedByUser.value = false
+    playDetailAutoplay({ reset: true, force: true })
+  } else {
+    stopDetailAutoplay({ byUser: true })
+  }
 }
 
 function openDetail(item: KeyboardEntryVM) {
@@ -783,19 +984,31 @@ function closeDetail() {
 function detailPrev() {
   if (!detailEmblaApi) return
   detailEmblaApi.scrollPrev()
-  resetAutoplay(detailEmblaApi)
+
+  if (!detailAutoplayPausedByUser.value) {
+    resetAutoplay(detailEmblaApi)
+    syncDetailAutoplayState()
+  }
 }
 
 function detailNext() {
   if (!detailEmblaApi) return
   detailEmblaApi.scrollNext()
-  resetAutoplay(detailEmblaApi)
+
+  if (!detailAutoplayPausedByUser.value) {
+    resetAutoplay(detailEmblaApi)
+    syncDetailAutoplayState()
+  }
 }
 
 function scrollToSlideDetail(snapIndex: number) {
   if (!detailEmblaApi) return
   detailEmblaApi.scrollTo(snapIndex)
-  resetAutoplay(detailEmblaApi)
+
+  if (!detailAutoplayPausedByUser.value) {
+    resetAutoplay(detailEmblaApi)
+    syncDetailAutoplayState()
+  }
 }
 
 async function onDetailAfterEnter() {
@@ -840,6 +1053,12 @@ function onKeydown(e: globalThis.KeyboardEvent) {
 
   if (e.key === 'Escape') {
     closeDetail()
+    return
+  }
+
+  if (e.key === ' ' && detailCanAutoplay.value && !isTypingTarget(document.activeElement)) {
+    e.preventDefault()
+    toggleDetailAutoplay()
     return
   }
 
@@ -1192,6 +1411,70 @@ const stats = computed(() => ({
       </div>
     </section>
 
+    <section class="kb-switches">
+      <header class="played-head switch-head">
+        <div class="played-head__top switch-head__top">
+          <div class="played-head__title-group">
+            <span class="played-head__en">SWITCH ARCHIVE</span>
+            <h2>流水的轴体</h2>
+          </div>
+
+          <div class="switch-summary">
+            <span class="played-count">{{ switchStats.total }} 枚</span>
+            <div class="switch-breakdown">
+              <span
+                v-for="item in switchStats.types"
+                :key="item.type"
+                class="switch-breakdown__item"
+              >
+                {{ item.type }} {{ item.count }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="switch-archive">
+        <div class="switch-archive__head" aria-hidden="true">
+          <span>#</span>
+          <span>轴体</span>
+          <span>特征</span>
+          <span>备注</span>
+        </div>
+
+        <ol class="switch-list">
+          <li
+            v-for="(item, idx) in playedSwitches"
+            :key="item.name"
+            class="switch-row"
+          >
+            <div class="switch-row__index">{{ String(idx + 1).padStart(2, '0') }}</div>
+
+            <div class="switch-row__name">
+              <div class="switch-row__titleline">
+                <h3>{{ item.name }}</h3>
+                <span class="switch-type">{{ item.type }}</span>
+              </div>
+            </div>
+
+            <div class="switch-row__traits">
+              <span class="switch-pill">{{ item.profile }}</span>
+              <span class="switch-pill">{{ item.sound }}</span>
+              <span
+                v-for="tag in item.tags"
+                :key="tag"
+                class="switch-pill switch-pill--muted"
+              >
+                {{ tag }}
+              </span>
+            </div>
+
+            <p class="switch-row__note">{{ item.note }}</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
     <Teleport to="body">
       <Transition name="mask-fade">
         <div
@@ -1216,18 +1499,51 @@ const stats = computed(() => ({
                   <span v-if="detailItem?.layoutTag" class="chip chip-strong">
                     {{ formatLayoutLabel(detailItem.layoutTag) }}
                   </span>
-                  <span v-if="detailItem && detailCanAutoplay" class="chip chip-auto">AUTO</span>
+                  <span v-if="detailItem" class="chip chip-counter">{{ detailCountLabel }}</span>
+                  <span v-if="detailItem && detailCanAutoplay" class="chip chip-auto">
+                    {{ detailAutoplayStatusLabel }}
+                  </span>
                 </div>
 
-                <button
-                  ref="closeBtnRef"
-                  class="icon-btn"
-                  type="button"
-                  aria-label="关闭"
-                  @click="closeDetail"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                </button>
+                <div class="drawer-head__actions">
+                  <button
+                    v-if="detailItem && detailCanAutoplay"
+                    class="chip-btn"
+                    type="button"
+                    :aria-label="detailAutoplayPausedByUser ? '开启自动轮播' : '暂停自动轮播'"
+                    @click="toggleDetailAutoplay"
+                  >
+                    <svg
+                      v-if="!detailAutoplayPausedByUser"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M8 5h3v14H8zm5 0h3v14h-3z"/>
+                    </svg>
+                    <svg
+                      v-else
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="m8 5 11 7-11 7z"/>
+                    </svg>
+                    <span>{{ detailAutoplayPausedByUser ? '播放' : '暂停' }}</span>
+                  </button>
+
+                  <button
+                    ref="closeBtnRef"
+                    class="icon-btn"
+                    type="button"
+                    aria-label="关闭"
+                    @click="closeDetail"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                  </button>
+                </div>
               </header>
 
               <div v-if="detailItem" class="drawer-body">
@@ -1237,12 +1553,17 @@ const stats = computed(() => ({
 
                   <div class="drawer-note">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.001"/><path d="M10 8h.001"/><path d="M14 8h.001"/><path d="M18 8h.001"/><path d="M8 12h.001"/><path d="M12 12h.001"/><path d="M16 12h.001"/><path d="M7 16h10"/></svg>
-                    <span>{{ '\u2190/\u2192 \u5207\u6362\uff0cESC \u5173\u95ed' }}</span>
+                    <span>{{ '\u2190/\u2192 切换，Space 自动轮播，ESC 关闭' }}</span>
                   </div>
                 </div>
 
                 <div class="drawer-right">
-                  <div class="drawer-carousel">
+                  <div
+                    class="drawer-carousel"
+                    @mouseenter="handleDetailCarouselMouseEnter"
+                    @mouseleave="handleDetailCarouselMouseLeave"
+                  >
+
                     <div
                       ref="detailEmblaRef"
                       class="detail-viewport"
@@ -1648,6 +1969,42 @@ const stats = computed(() => ({
   letter-spacing: 0.05em;
 }
 
+.chip-counter {
+  color: var(--c-text);
+}
+
+.chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  height: 36px;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--c-primary) 26%, var(--c-border));
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--c-primary) 10%, var(--c-bg-1)),
+      color-mix(in srgb, var(--c-primary) 4%, var(--c-bg-1))
+    );
+  color: var(--c-text);
+  cursor: pointer;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease, background 200ms ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--c-primary) 45%, var(--c-border));
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--c-primary) 12%, transparent);
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
 .title {
   margin: 0;
   font-size: 1.6rem;
@@ -1786,7 +2143,8 @@ const stats = computed(() => ({
   }
 }
 
-.kb-played {
+.kb-played,
+.kb-switches {
   max-width: 1100px;
   margin: 0 auto;
   padding: 0 1.25rem;
@@ -2294,6 +2652,198 @@ const stats = computed(() => ({
   }
 }
 
+.switch-head {
+  margin-top: 3.25rem;
+}
+
+.switch-head__top {
+  align-items: flex-start;
+}
+
+.switch-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.switch-breakdown {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.switch-breakdown__item {
+  font-family: var(--font-monospace);
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--c-text-2);
+  padding: 0.24rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--c-border) 45%, transparent);
+  background: color-mix(in srgb, var(--c-bg-1) 42%, transparent);
+}
+
+.switch-archive {
+  position: relative;
+  border-radius: 1.4rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--c-border) 55%, transparent);
+  background:
+    radial-gradient(120% 180% at 0% 0%, color-mix(in srgb, var(--c-primary) 8%, transparent), transparent 55%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--c-bg-1) 96%, transparent),
+      color-mix(in srgb, var(--c-bg-1) 90%, transparent)
+    );
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--c-border) 8%, transparent),
+    0 24px 60px color-mix(in srgb, var(--c-text) 7%, transparent);
+}
+
+.switch-archive::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--c-primary) 6%, transparent), transparent 18%, transparent 82%, color-mix(in srgb, var(--c-primary) 6%, transparent)),
+    linear-gradient(180deg, color-mix(in srgb, #fff 8%, transparent), transparent 16%);
+  opacity: 0.8;
+}
+
+.switch-archive__head {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 84px 1.1fr 1fr 1.15fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--c-border) 38%, transparent);
+  background: color-mix(in srgb, var(--c-bg) 36%, transparent);
+  backdrop-filter: blur(10px);
+  font-family: var(--font-monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-text-3);
+}
+
+.switch-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.switch-row {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 84px 1.1fr 1fr 1.15fr;
+  gap: 1rem;
+  align-items: start;
+  padding: 1.15rem 1.2rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--c-border) 26%, transparent);
+  transition: background 220ms ease, transform 220ms ease, box-shadow 220ms ease;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background:
+      linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--c-primary) 7%, transparent),
+        transparent 16%,
+        transparent 84%,
+        color-mix(in srgb, var(--c-primary) 7%, transparent)
+      ),
+      color-mix(in srgb, var(--c-bg-1) 84%, transparent);
+  }
+}
+
+.switch-row__index {
+  font-family: var(--font-monospace);
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: color-mix(in srgb, var(--c-text) 82%, transparent);
+  padding-top: 0.15rem;
+}
+
+.switch-row__name {
+  min-width: 0;
+}
+
+.switch-row__titleline {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+
+  h3 {
+    margin: 0;
+    font-size: 1.04rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: var(--c-text);
+  }
+}
+
+.switch-type {
+  display: inline-flex;
+  align-items: center;
+  height: 1.55rem;
+  padding: 0 0.55rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--c-primary) 26%, transparent);
+  background: color-mix(in srgb, var(--c-primary) 10%, transparent);
+  color: var(--c-primary);
+  font-family: var(--font-monospace);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.switch-row__traits {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
+
+.switch-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.7rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--c-border) 50%, transparent);
+  background: color-mix(in srgb, var(--c-bg) 42%, transparent);
+  color: var(--c-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.switch-pill--muted {
+  color: var(--c-text-2);
+  background: color-mix(in srgb, var(--c-bg-1) 56%, transparent);
+}
+
+.switch-row__note {
+  margin: 0;
+  color: var(--c-text-2);
+  line-height: 1.78;
+  font-size: 0.88rem;
+}
+
 .drawer-mask {
   position: fixed;
   inset: 0;
@@ -2339,6 +2889,12 @@ const stats = computed(() => ({
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
+}
+
+.drawer-head__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
 }
 
 .icon-btn {
@@ -2655,6 +3211,21 @@ const stats = computed(() => ({
   .nav-btn {
     opacity: 1;
   }
+
+  .switch-archive__head,
+  .switch-row {
+    grid-template-columns: 64px 1fr;
+  }
+
+  .switch-archive__head span:nth-child(3),
+  .switch-archive__head span:nth-child(4) {
+    display: none;
+  }
+
+  .switch-row__traits,
+  .switch-row__note {
+    grid-column: 2;
+  }
 }
 
 @media (max-width: 640px) {
@@ -2702,6 +3273,14 @@ const stats = computed(() => ({
     border-radius: 1.2rem;
   }
 
+  .drawer-head {
+    align-items: flex-start;
+  }
+
+  .drawer-head__actions {
+    flex-shrink: 0;
+  }
+
   .drawer-body {
     padding: 1rem;
     gap: 1rem;
@@ -2713,6 +3292,44 @@ const stats = computed(() => ({
 
   .thumbs {
     gap: 0.35rem;
+  }
+
+  .switch-head__top,
+  .played-head__top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .switch-summary,
+  .switch-breakdown {
+    justify-content: flex-start;
+  }
+
+  .switch-archive {
+    border-radius: 1rem;
+  }
+
+  .switch-archive__head {
+    display: none;
+  }
+
+  .switch-row {
+    grid-template-columns: 52px 1fr;
+    gap: 0.85rem;
+    padding: 1rem;
+  }
+
+  .switch-row__traits,
+  .switch-row__note {
+    grid-column: 1 / -1;
+  }
+
+  .switch-row__index {
+    font-size: 0.95rem;
+  }
+
+  .switch-row__titleline h3 {
+    font-size: 0.98rem;
   }
 }
 
