@@ -31,17 +31,22 @@ interface KeyboardEntryVM extends KeyboardEntry {
 
 interface SwitchEntry {
   name: string
-  type: string
-  profile: string
-  sound: string
-  tags: string[]
-  note: string
+  type?: string
+  profile?: string
+  sound?: string
+  tags?: string[]
+  note?: string
+  audio?: string
 }
 
 type DetailThumbSlot =
   | { type: 'index'; key: string; index: number; media: KeyboardMedia }
   | { type: 'ellipsis'; key: string }
   | { type: 'empty'; key: string }
+
+type SwitchMetaPart =
+  | { key: string; kind: 'trait'; text: string }
+  | { key: string; kind: 'tag'; text: string }
 
 const DATE_RE = /^(\d{4})(?:-(\d{1,2})(?:-(\d{1,2}))?)?$/
 const PAGE_SIZE = 24
@@ -91,6 +96,46 @@ function isTypingTarget(el: Element | null) {
   return !!h.isContentEditable
 }
 
+function hasText(value?: string | null) {
+  return !!value?.trim()
+}
+
+function getSwitchTags(item: SwitchEntry) {
+  return (item.tags ?? [])
+    .map(tag => tag.trim())
+    .filter(Boolean)
+}
+
+function getSwitchMetaParts(item: SwitchEntry): SwitchMetaPart[] {
+  const parts: SwitchMetaPart[] = []
+
+  if (hasText(item.profile)) {
+    parts.push({
+      key: `${item.name}-profile`,
+      kind: 'trait',
+      text: item.profile!.trim(),
+    })
+  }
+
+  if (hasText(item.sound)) {
+    parts.push({
+      key: `${item.name}-sound`,
+      kind: 'trait',
+      text: item.sound!.trim(),
+    })
+  }
+
+  getSwitchTags(item).forEach((tag, index) => {
+    parts.push({
+      key: `${item.name}-tag-${index}-${tag}`,
+      kind: 'tag',
+      text: tag,
+    })
+  })
+
+  return parts
+}
+
 async function waitTwoFrames() {
   await new Promise<void>(r => requestAnimationFrame(() => r()))
   await new Promise<void>(r => requestAnimationFrame(() => r()))
@@ -103,6 +148,7 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     desc: '蛇年的礼物，没赶上车，只能在二手市场收了一把全新未拆的hhkb。好贵好贵，到手欣赏了一晚上，最终还是决定出掉，很不舍，但理性最终获胜了。',
     layout: '60',
     medias: [
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa4734d84d6.webp', type: 'image' },
       { src: 'https://free.picui.cn/free/2026/03/06/69aa47331e49d.webp', type: 'image' },
       { src: 'https://free.picui.cn/free/2026/03/06/69aa4732c0f42.webp', type: 'image' },
       { src: 'https://free.picui.cn/free/2026/03/06/69aa473331a15.webp', type: 'image' },
@@ -112,7 +158,6 @@ const rawKeyboardEvents: KeyboardEntry[] = [
       { src: 'https://free.picui.cn/free/2026/03/06/69aa4739aa71b.webp', type: 'image' },
       { src: 'https://free.picui.cn/free/2026/03/06/69aa473a245a7.webp', type: 'image' },
       { src: 'https://free.picui.cn/free/2026/03/06/69aa473398e5d.webp', type: 'image' },
-      { src: 'https://free.picui.cn/free/2026/03/06/69aa4734d84d6.webp', type: 'image' },
       { src: 'https://free.picui.cn/free/2026/03/06/69aa4735266e1.webp', type: 'image' },
       { src: 'https://free.picui.cn/free/2026/03/06/69aa473612865.webp', type: 'image' },
       { src: 'https://free.picui.cn/free/2026/03/06/69aa4736ca86a.webp', type: 'image' },
@@ -445,67 +490,78 @@ const playedAll: KeyboardEntryVM[] = keyboardEvents.filter(e => !mainIds.has(e.i
 
 const playedSwitches = ref<SwitchEntry[]>([
   {
-    name: 'BCP',
+    name: '凯华BCP [KCP]',
     type: '线性',
-    profile: '高回弹 / 偏硬底',
-    sound: '脆 / 集中',
-    tags: ['经典混轴', '高上桌率'],
-    note: '适合做一把有“收束感”的声音取向，和铜底、PBT 的组合很容易出高级感。',
+    profile: '重压力 / 轴心柱触底',
+    sound: '沙 / 脆',
+    tags: ['通用'],
+    note: '适合做一把有"收束感"的声音取向，和铜底、PBT 的组合很容易出高级感。',
+    audio: '/audio/bcp-switch.mp3',
   },
   {
-    name: 'HMX 云岚',
+    name: 'HG 黑',
     type: '线性',
-    profile: '顺滑 / 干净',
-    sound: '偏亮',
-    tags: ['轻快', '量产友好'],
+    profile: 'Cherry / 轴心壁触底',
+    sound: '沙 / 脆',
+    tags: ['无棉向', 'og必玩'],
     note: '手感很轻盈，适合日常高频打字，整体听感比较利落。',
   },
   {
-    name: 'TTC 金粉 V2',
+    name: 'TTC 静音茶',
     type: '段落',
-    profile: '轻段落 / 快触发',
-    sound: '清亮',
-    tags: ['经典', '易上手'],
+    profile: 'Cherry',
+    sound: '沙 / 脆',
+    tags: ['无棉向'],
     note: '想要段落感但又不想太累手时，这类轴一直很稳。',
   },
   {
-    name: '佳达隆 油王',
+    name: 'TT red',
     type: '线性',
-    profile: '顺滑 / 沉稳',
-    sound: '偏闷',
-    tags: ['老牌线性', '容错高'],
+    profile: '顺滑 / 轴心柱触底',
+    sound: '脆 / 集中',
+    tags: ['无棉向', 'tt哥严选'],
     note: '不是最炸裂的那种类型，但搭配宽容度高，很多板子都能压得住。',
   },
   {
-    name: 'KTT 草莓',
+    name: 'Y2',
     type: '线性',
-    profile: '软弹 / 轻压',
-    sound: '甜脆',
-    tags: ['性价比', '轻松向'],
+    profile: '顺滑 / 闷',
+    sound: '圆润 / hifi',
+    tags: ['全棉向'],
+    note: '属于功能性很强的轴，声音控制比较明显，适合特定使用场景。',
+  },
+  {
+    name: 'Y3',
+    type: '线性',
+    profile: '顺滑 / 闷',
+    sound: '圆润 / hifi',
+    tags: ['全棉向'],
+    note: '属于功能性很强的轴，声音控制比较明显，适合特定使用场景。',
+  },
+  {
+    name: '水蜜桃',
+    type: '静音',
+    profile: '缓冲明显 / 轻压',
+    tags: ['性价比', '手感偏肉'],
     note: '更偏轻松耐玩的路数，适合拿来感受不同声音走向。',
   },
   {
-    name: 'WS Morandi',
-    type: '线性',
-    profile: '绵密 / 扎实',
-    sound: '偏沉',
-    tags: ['厚实', '耐听'],
-    note: '如果你追求更厚一点、更稳一点的声音，Morandi 这类风格通常很合适。',
-  },
-  {
-    name: '冰静轴',
+    name: '青苹果',
     type: '静音',
-    profile: '柔和 / 缓冲明显',
-    sound: '低存在感',
-    tags: ['办公室', '夜间友好'],
-    note: '属于功能性很强的轴，声音控制比较明显，适合特定使用场景。',
+    profile: '缓冲明显 / 轻压',
+    tags: ['手感偏肉'],
+    note: '如果你追求更厚一点、更稳一点的声音，Morandi 这类风格通常很合适。',
   },
 ])
 
+const activeSwitchNote = ref<string | null>(null)
+
 const switchStats = computed(() => {
   const bucket = new Map<string, number>()
+
   playedSwitches.value.forEach((item) => {
-    bucket.set(item.type, (bucket.get(item.type) ?? 0) + 1)
+    const typeLabel = hasText(item.type) ? item.type!.trim() : '未分类'
+    bucket.set(typeLabel, (bucket.get(typeLabel) ?? 0) + 1)
   })
 
   return {
@@ -513,6 +569,40 @@ const switchStats = computed(() => {
     types: Array.from(bucket.entries()).map(([type, count]) => ({ type, count })),
   }
 })
+
+// Switch audio playback
+const playingSwitchAudio = ref<string | null>(null)
+let switchAudioInstance: HTMLAudioElement | null = null
+
+function toggleSwitchNote(item: SwitchEntry) {
+  if (!hasText(item.note)) return
+  activeSwitchNote.value = activeSwitchNote.value === item.name ? null : item.name
+}
+
+function toggleSwitchAudio(item: SwitchEntry) {
+  if (!item.audio) return
+
+  if (playingSwitchAudio.value === item.name) {
+    switchAudioInstance?.pause()
+    switchAudioInstance = null
+    playingSwitchAudio.value = null
+    return
+  }
+
+  if (switchAudioInstance) {
+    switchAudioInstance.pause()
+    switchAudioInstance = null
+  }
+
+  switchAudioInstance = new Audio(item.audio)
+  switchAudioInstance.play()
+  playingSwitchAudio.value = item.name
+
+  switchAudioInstance.addEventListener('ended', () => {
+    playingSwitchAudio.value = null
+    switchAudioInstance = null
+  })
+}
 
 type EmblaApiLike = any
 
@@ -690,11 +780,18 @@ function selectLayout(val: 'all' | string) {
 
 function handleClickOutsideDropdown(e: MouseEvent) {
   const target = e.target as Node | null
+  const targetEl = e.target instanceof Element ? e.target : null
+
   if (yearSelectRef.value && target && !yearSelectRef.value.contains(target)) {
     yearOpen.value = false
   }
+
   if (layoutSelectRef.value && target && !layoutSelectRef.value.contains(target)) {
     layoutOpen.value = false
+  }
+
+  if (!targetEl?.closest('.switch-item__note-wrap')) {
+    activeSwitchNote.value = null
   }
 }
 
@@ -1049,6 +1146,11 @@ watch(
 )
 
 function onKeydown(e: globalThis.KeyboardEvent) {
+  if (e.key === 'Escape' && activeSwitchNote.value) {
+    activeSwitchNote.value = null
+    if (!detailOpen.value) return
+  }
+
   if (!detailOpen.value) return
 
   if (e.key === 'Escape') {
@@ -1412,64 +1514,166 @@ const stats = computed(() => ({
     </section>
 
     <section class="kb-switches">
-      <header class="played-head switch-head">
-        <div class="played-head__top switch-head__top">
-          <div class="played-head__title-group">
-            <span class="played-head__en">SWITCH ARCHIVE</span>
-            <h2>流水的轴体</h2>
+      <header class="switch-section-header">
+        <div class="switch-section-header__left">
+          <span class="switch-section-header__label">SWITCH ARCHIVE</span>
+          <h2 class="switch-section-header__title">流水的轴体</h2>
+        </div>
+        <div class="switch-section-header__right">
+          <div class="switch-stats">
+            <span class="switch-stats__total">{{ switchStats.total }}</span>
+            <span class="switch-stats__unit">枚</span>
           </div>
-
-          <div class="switch-summary">
-            <span class="played-count">{{ switchStats.total }} 枚</span>
-            <div class="switch-breakdown">
-              <span
-                v-for="item in switchStats.types"
-                :key="item.type"
-                class="switch-breakdown__item"
-              >
-                {{ item.type }} {{ item.count }}
-              </span>
-            </div>
+          <div class="switch-stats__types">
+            <span
+              v-for="item in switchStats.types"
+              :key="item.type"
+              class="switch-stats__type-item"
+            >
+              <span class="switch-stats__type-dot" :class="`switch-stats__type-dot--${item.type}`" />
+              {{ item.type }} {{ item.count }}
+            </span>
           </div>
         </div>
       </header>
 
-      <div class="switch-archive">
-        <div class="switch-archive__head" aria-hidden="true">
-          <span>#</span>
-          <span>轴体</span>
-          <span>特征</span>
-          <span>备注</span>
-        </div>
-
+      <div class="switch-list-container">
         <ol class="switch-list">
           <li
             v-for="(item, idx) in playedSwitches"
             :key="item.name"
-            class="switch-row"
+            class="switch-item"
           >
-            <div class="switch-row__index">{{ String(idx + 1).padStart(2, '0') }}</div>
+            <span class="switch-item__index">{{ String(idx + 1).padStart(2, '0') }}</span>
 
-            <div class="switch-row__name">
-              <div class="switch-row__titleline">
-                <h3>{{ item.name }}</h3>
-                <span class="switch-type">{{ item.type }}</span>
+            <div class="switch-item__content">
+              <div class="switch-item__left">
+                <div class="switch-item__header">
+                  <div class="switch-item__title-row">
+                    <h3 class="switch-item__name">{{ item.name }}</h3>
+
+                    <button
+                      v-if="item.audio"
+                      type="button"
+                      class="switch-item__audio-btn switch-item__audio-btn--inline"
+                      :class="{ 'is-playing': playingSwitchAudio === item.name }"
+                      :aria-label="`${playingSwitchAudio === item.name ? '暂停' : '播放'} ${item.name} 轴体音效`"
+                      @click.stop="toggleSwitchAudio(item)"
+                    >
+                      <svg
+                        v-if="playingSwitchAudio !== item.name"
+                        width="15"
+                        height="15"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M9 18V5l12-2v13" />
+                        <circle cx="6" cy="18" r="3" />
+                        <circle cx="18" cy="16" r="3" />
+                      </svg>
+
+                      <svg
+                        v-else
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="15"
+                        height="15"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                      </svg>
+                    </button>
+
+                    <span
+                      v-if="hasText(item.type)"
+                      class="switch-item__type"
+                      :class="`switch-item__type--${item.type}`"
+                    >
+                      {{ item.type }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="switch-item__right">
+                <div
+                  v-if="getSwitchMetaParts(item).length"
+                  class="switch-item__meta"
+                >
+                  <template
+                    v-for="(part, partIndex) in getSwitchMetaParts(item)"
+                    :key="part.key"
+                  >
+                    <span
+                      v-if="partIndex > 0"
+                      class="switch-item__divider"
+                    />
+
+                    <span
+                      v-if="part.kind === 'trait'"
+                      class="switch-item__trait"
+                    >
+                      {{ part.text }}
+                    </span>
+
+                    <span
+                      v-else
+                      class="switch-item__tag"
+                    >
+                      {{ part.text }}
+                    </span>
+                  </template>
+                </div>
+
+                <div class="switch-item__actions">
+                  <div
+                    v-if="hasText(item.note)"
+                    class="switch-item__note-wrap"
+                  >
+                    <Transition name="switch-note-pop">
+                      <div
+                        v-if="activeSwitchNote === item.name"
+                        :id="`switch-note-${idx}`"
+                        class="switch-item__note-pop"
+                        role="note"
+                        @click.stop
+                      >
+                        <div class="switch-item__note-pop-badge">NOTE</div>
+                        <p class="switch-item__note-pop-text">{{ item.note }}</p>
+                      </div>
+                    </Transition>
+
+                    <button
+                      type="button"
+                      class="switch-item__note-btn"
+                      :class="{ 'is-active': activeSwitchNote === item.name }"
+                      :aria-expanded="activeSwitchNote === item.name"
+                      :aria-controls="`switch-note-${idx}`"
+                      :aria-label="`${activeSwitchNote === item.name ? '收起' : '查看'} ${item.name} 的备注`"
+                      @click.stop="toggleSwitchNote(item)"
+                    >
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                      </svg>
+                      <span>{{ activeSwitchNote === item.name ? '收起备注' : '查看备注' }}</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-
-            <div class="switch-row__traits">
-              <span class="switch-pill">{{ item.profile }}</span>
-              <span class="switch-pill">{{ item.sound }}</span>
-              <span
-                v-for="tag in item.tags"
-                :key="tag"
-                class="switch-pill switch-pill--muted"
-              >
-                {{ tag }}
-              </span>
-            </div>
-
-            <p class="switch-row__note">{{ item.note }}</p>
           </li>
         </ol>
       </div>
@@ -1563,7 +1767,6 @@ const stats = computed(() => ({
                     @mouseenter="handleDetailCarouselMouseEnter"
                     @mouseleave="handleDetailCarouselMouseLeave"
                   >
-
                     <div
                       ref="detailEmblaRef"
                       class="detail-viewport"
@@ -2652,85 +2855,108 @@ const stats = computed(() => ({
   }
 }
 
-.switch-head {
-  margin-top: 3.25rem;
-}
-
-.switch-head__top {
-  align-items: flex-start;
-}
-
-.switch-summary {
+/* Switch Section - Premium Card Layout */
+.switch-section-header {
+  margin-top: 4rem;
+  margin-bottom: 2rem;
   display: flex;
-  align-items: center;
-  gap: 0.65rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
   flex-wrap: wrap;
-  justify-content: flex-end;
 }
 
-.switch-breakdown {
+.switch-section-header__left {
   display: flex;
-  gap: 0.45rem;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
-.switch-breakdown__item {
+.switch-section-header__label {
   font-family: var(--font-monospace);
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: var(--c-text-2);
-  padding: 0.24rem 0.6rem;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--c-border) 45%, transparent);
-  background: color-mix(in srgb, var(--c-bg-1) 42%, transparent);
-}
-
-.switch-archive {
-  position: relative;
-  border-radius: 1.4rem;
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--c-border) 55%, transparent);
-  background:
-    radial-gradient(120% 180% at 0% 0%, color-mix(in srgb, var(--c-primary) 8%, transparent), transparent 55%),
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--c-bg-1) 96%, transparent),
-      color-mix(in srgb, var(--c-bg-1) 90%, transparent)
-    );
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--c-border) 8%, transparent),
-    0 24px 60px color-mix(in srgb, var(--c-text) 7%, transparent);
-}
-
-.switch-archive::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(90deg, color-mix(in srgb, var(--c-primary) 6%, transparent), transparent 18%, transparent 82%, color-mix(in srgb, var(--c-primary) 6%, transparent)),
-    linear-gradient(180deg, color-mix(in srgb, #fff 8%, transparent), transparent 16%);
-  opacity: 0.8;
-}
-
-.switch-archive__head {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: 84px 1.1fr 1fr 1.15fr;
-  gap: 1rem;
-  align-items: center;
-  padding: 1rem 1.2rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--c-border) 38%, transparent);
-  background: color-mix(in srgb, var(--c-bg) 36%, transparent);
-  backdrop-filter: blur(10px);
-  font-family: var(--font-monospace);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--c-text-3);
+}
+
+.switch-section-header__title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--c-text);
+}
+
+.switch-section-header__right {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.switch-stats {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.switch-stats__total {
+  font-family: var(--font-monospace);
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--c-text);
+  line-height: 1;
+}
+
+.switch-stats__unit {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--c-text-3);
+}
+
+.switch-stats__types {
+  display: flex;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.switch-stats__type-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-monospace);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--c-text-2);
+}
+
+.switch-stats__type-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--c-text-3);
+}
+
+.switch-stats__type-dot--线性 {
+  background: #3b82f6;
+}
+
+.switch-stats__type-dot--段落 {
+  background: #f59e0b;
+}
+
+.switch-stats__type-dot--静音 {
+  background: #10b981;
+}
+
+.switch-list-container {
+  position: relative;
+  border-radius: 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--c-border) 40%, transparent);
+  background: color-mix(in srgb, var(--c-bg-1) 50%, transparent);
+  overflow: visible;
 }
 
 .switch-list {
@@ -2739,109 +2965,280 @@ const stats = computed(() => ({
   padding: 0;
 }
 
-.switch-row {
+.switch-item {
   position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: 84px 1.1fr 1fr 1.15fr;
-  gap: 1rem;
-  align-items: start;
-  padding: 1.15rem 1.2rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--c-border) 26%, transparent);
-  transition: background 220ms ease, transform 220ms ease, box-shadow 220ms ease;
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &:hover {
-    background:
-      linear-gradient(
-        90deg,
-        color-mix(in srgb, var(--c-primary) 7%, transparent),
-        transparent 16%,
-        transparent 84%,
-        color-mix(in srgb, var(--c-primary) 7%, transparent)
-      ),
-      color-mix(in srgb, var(--c-bg-1) 84%, transparent);
-  }
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 1.35rem 1.75rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--c-border) 15%, transparent);
 }
 
-.switch-row__index {
+.switch-item:last-child {
+  border-bottom: none;
+}
+
+.switch-item__index {
+  flex-shrink: 0;
   font-family: var(--font-monospace);
-  font-size: 1.05rem;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  color: color-mix(in srgb, var(--c-text) 82%, transparent);
-  padding-top: 0.15rem;
+  font-size: 2.25rem;
+  font-weight: 200;
+  font-style: italic;
+  letter-spacing: -0.08em;
+  color: color-mix(in srgb, var(--c-text) 15%, transparent);
+  width: 3rem;
+  text-align: right;
 }
 
-.switch-row__name {
+.switch-item__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.switch-item__left {
+  flex-shrink: 0;
   min-width: 0;
 }
 
-.switch-row__titleline {
+.switch-item__right {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  flex-wrap: wrap;
-
-  h3 {
-    margin: 0;
-    font-size: 1.04rem;
-    font-weight: 900;
-    letter-spacing: -0.02em;
-    color: var(--c-text);
-  }
+  justify-content: flex-end;
+  gap: 1rem;
 }
 
-.switch-type {
-  display: inline-flex;
-  align-items: center;
-  height: 1.55rem;
-  padding: 0 0.55rem;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--c-primary) 26%, transparent);
-  background: color-mix(in srgb, var(--c-primary) 10%, transparent);
-  color: var(--c-primary);
-  font-family: var(--font-monospace);
-  font-size: 0.64rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.switch-row__traits {
+.switch-item__header {
   display: flex;
-  gap: 0.45rem;
-  flex-wrap: wrap;
-  align-content: flex-start;
+  flex-direction: column;
+  gap: 0.2rem;
 }
 
-.switch-pill {
-  display: inline-flex;
+.switch-item__title-row {
+  display: flex;
   align-items: center;
-  min-height: 1.7rem;
-  padding: 0.25rem 0.7rem;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--c-border) 50%, transparent);
-  background: color-mix(in srgb, var(--c-bg) 42%, transparent);
-  color: var(--c-text);
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1.2;
+  gap: 0.65rem;
+  flex-wrap: wrap;
 }
 
-.switch-pill--muted {
-  color: var(--c-text-2);
-  background: color-mix(in srgb, var(--c-bg-1) 56%, transparent);
-}
-
-.switch-row__note {
+.switch-item__name {
   margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--c-text);
+  line-height: 1.3;
+}
+
+.switch-item__type {
+  font-family: var(--font-monospace);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--c-text) 6%, transparent);
   color: var(--c-text-2);
-  line-height: 1.78;
-  font-size: 0.88rem;
+}
+
+.switch-item__type--线性 {
+  background: color-mix(in srgb, #3b82f6 12%, transparent);
+  color: #3b82f6;
+}
+
+.switch-item__type--段落 {
+  background: color-mix(in srgb, #f59e0b 12%, transparent);
+  color: #f59e0b;
+}
+
+.switch-item__type--静音 {
+  background: color-mix(in srgb, #10b981 12%, transparent);
+  color: #10b981;
+}
+
+.switch-item__meta {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.switch-item__trait {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--c-text-2);
+}
+
+.switch-item__divider {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--c-text-3);
+  opacity: 0.4;
+  flex-shrink: 0;
+}
+
+.switch-item__tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--c-text-3);
+  background: color-mix(in srgb, var(--c-text) 5%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c-border) 30%, transparent);
+}
+
+.switch-item__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.switch-item__note-wrap {
+  position: relative;
+  z-index: 5;
+}
+
+.switch-item__note-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  height: 2.2rem;
+  padding: 0 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--c-border) 50%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--c-bg-1) 60%, transparent);
+  color: var(--c-text-2);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.switch-item__note-btn:hover,
+.switch-item__note-btn.is-active {
+  border-color: color-mix(in srgb, var(--c-primary) 36%, transparent);
+  color: var(--c-primary);
+  background: color-mix(in srgb, var(--c-primary) 8%, transparent);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--c-primary) 10%, transparent);
+}
+
+.switch-item__note-btn:hover {
+  transform: translateY(-1px);
+}
+
+.switch-item__note-pop {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.7rem);
+  width: min(22rem, 72vw);
+  padding: 0.95rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in srgb, var(--c-border) 45%, transparent);
+  background:
+    radial-gradient(
+      120% 140% at 0% 0%,
+      color-mix(in srgb, var(--c-primary) 10%, transparent),
+      transparent 55%
+    ),
+    color-mix(in srgb, var(--c-bg) 96%, transparent);
+  backdrop-filter: blur(16px);
+  box-shadow:
+    0 14px 40px color-mix(in srgb, var(--c-text) 18%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--c-bg-0) 20%, transparent);
+  z-index: 12;
+}
+
+.switch-item__note-pop::after {
+  content: '';
+  position: absolute;
+  right: 1rem;
+  top: calc(100% - 0.4rem);
+  width: 12px;
+  height: 12px;
+  background: color-mix(in srgb, var(--c-bg) 96%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--c-border) 45%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--c-border) 45%, transparent);
+  transform: rotate(45deg);
+}
+
+.switch-item__note-pop-badge {
+  margin-bottom: 0.45rem;
+  font-family: var(--font-monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--c-primary);
+}
+
+.switch-item__note-pop-text {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.75;
+  color: var(--c-text-2);
+  word-break: break-word;
+}
+
+.switch-item__audio-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--c-border) 50%, transparent);
+  color: var(--c-text-2);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.switch-item__audio-btn--inline {
+  width: 1.95rem;
+  height: 1.95rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--c-bg-1) 55%, transparent);
+}
+
+.switch-item__audio-btn--inline:hover,
+.switch-item__audio-btn--inline.is-playing {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--c-primary) 45%, transparent);
+  color: var(--c-primary);
+  background: color-mix(in srgb, var(--c-primary) 8%, transparent);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--c-primary) 10%, transparent);
+}
+
+.switch-note-pop-enter-active,
+.switch-note-pop-leave-active {
+  transition: opacity 180ms ease, transform 180ms ease;
+  transform-origin: bottom right;
+}
+
+.switch-note-pop-enter-from,
+.switch-note-pop-leave-to {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
 }
 
 .drawer-mask {
@@ -3212,19 +3609,8 @@ const stats = computed(() => ({
     opacity: 1;
   }
 
-  .switch-archive__head,
-  .switch-row {
-    grid-template-columns: 64px 1fr;
-  }
-
-  .switch-archive__head span:nth-child(3),
-  .switch-archive__head span:nth-child(4) {
-    display: none;
-  }
-
-  .switch-row__traits,
-  .switch-row__note {
-    grid-column: 2;
+  .switch-item {
+    padding: 1rem 1.25rem;
   }
 }
 
@@ -3294,42 +3680,98 @@ const stats = computed(() => ({
     gap: 0.35rem;
   }
 
-  .switch-head__top,
   .played-head__top {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .switch-summary,
-  .switch-breakdown {
-    justify-content: flex-start;
+  .switch-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
   }
 
-  .switch-archive {
+  .switch-section-header__right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .switch-list-container {
     border-radius: 1rem;
   }
 
-  .switch-archive__head {
-    display: none;
+  .switch-item {
+    padding: 1.1rem 1.15rem;
+    gap: 1rem;
+    align-items: flex-start;
   }
 
-  .switch-row {
-    grid-template-columns: 52px 1fr;
-    gap: 0.85rem;
-    padding: 1rem;
+  .switch-item__index {
+    font-size: 1.75rem;
+    width: 2rem;
+    padding-top: 0.1rem;
   }
 
-  .switch-row__traits,
-  .switch-row__note {
-    grid-column: 1 / -1;
+  .switch-item__content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7rem;
   }
 
-  .switch-row__index {
-    font-size: 0.95rem;
+  .switch-item__right {
+    width: 100%;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
-  .switch-row__titleline h3 {
-    font-size: 0.98rem;
+  .switch-item__meta {
+    justify-content: flex-start;
+    gap: 0.45rem;
+  }
+
+  .switch-item__name {
+    font-size: 1.05rem;
+  }
+
+  .switch-item__title-row {
+    gap: 0.5rem;
+  }
+
+  .switch-item__trait {
+    font-size: 0.82rem;
+  }
+
+  .switch-item__actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .switch-item__note-btn {
+    height: 2rem;
+    padding: 0 0.72rem;
+    font-size: 0.74rem;
+  }
+
+  .switch-item__note-pop {
+    left: 0;
+    right: auto;
+    width: min(18rem, calc(100vw - 5rem));
+  }
+
+  .switch-item__note-pop::after {
+    left: 1rem;
+    right: auto;
+  }
+
+  .switch-item__audio-btn--inline {
+    width: 1.85rem;
+    height: 1.85rem;
+  }
+
+  .switch-stats__total {
+    font-size: 1.6rem;
   }
 }
 
