@@ -29,24 +29,48 @@ interface KeyboardEntryVM extends KeyboardEntry {
   layoutTag: string | null
 }
 
+type DetailThumbSlot =
+  | { type: 'index'; key: string; index: number; media: KeyboardMedia }
+  | { type: 'ellipsis'; key: string }
+  | { type: 'empty'; key: string }
+
+const DATE_RE = /^(\d{4})(?:-(\d{1,2})(?:-(\d{1,2}))?)?$/
+const PAGE_SIZE = 24
+const DETAIL_THUMB_SLOT_COUNT = 7
+
+function parseDateParts(input: string) {
+  const m = input.match(DATE_RE)
+  if (!m) return null
+
+  return {
+    year: m[1],
+    month: m[2] ? m[2].padStart(2, '0') : null,
+    day: m[3] ? m[3].padStart(2, '0') : null,
+  }
+}
+
 function parseDateLocal(input: string): Date {
-  const m = input.match(/^(\d{4})(?:-(\d{1,2})(?:-(\d{1,2}))?)?$/)
-  if (!m) return new Date(0)
-  const y = Number(m[1])
-  const mo = m[2] ? Number(m[2]) : 1
-  const d = m[3] ? Number(m[3]) : 1
-  return new Date(y, mo - 1, d)
+  const parts = parseDateParts(input)
+  if (!parts) return new Date(0)
+
+  return new Date(
+    Number(parts.year),
+    Number(parts.month ?? '01') - 1,
+    Number(parts.day ?? '01'),
+  )
 }
 
 function formatDate(input: string): string {
-  const m = input.match(/^(\d{4})(?:-(\d{1,2})(?:-(\d{1,2}))?)?$/)
-  if (!m) return input
-  const y = m[1]
-  const mo = m[2]
-  const d = m[3]
-  if (mo && d) return `${y}-${mo.padStart(2, '0')}-${d.padStart(2, '0')}`
-  if (mo) return `${y}-${mo.padStart(2, '0')}`
-  return y
+  const parts = parseDateParts(input)
+  if (!parts) return input
+  if (parts.month && parts.day) return `${parts.year}-${parts.month}-${parts.day}`
+  if (parts.month) return `${parts.year}-${parts.month}`
+  return parts.year
+}
+
+function formatLayoutLabel(layout?: string | null): string {
+  if (!layout) return ''
+  return Number.isNaN(Number(layout)) ? layout : `${layout}%`
 }
 
 function isTypingTarget(el: Element | null) {
@@ -62,7 +86,6 @@ async function waitTwoFrames() {
   await new Promise<void>(r => requestAnimationFrame(() => r()))
 }
 
-
 const rawKeyboardEvents: KeyboardEntry[] = [
   {
     date: '2026-02-23',
@@ -71,9 +94,15 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     layout: '75',
     featured: true,
     medias: [
-      { src: 'https://placehold.co/600x400?text=KB3-1', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB3-2', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB3-3', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97a7892347.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97a78d8f0c.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97d2bee6b7.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97d2bd366b.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97d2bee6b7.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97d2c8221a.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97d2bace00.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97d2ab915b.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97d2acd85a.webp', type: 'image' },
     ],
   },
   {
@@ -83,9 +112,11 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     layout: '75',
     featured: true,
     medias: [
-      { src: 'https://placehold.co/600x400?text=KB3-1', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB3-2', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB3-3', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97fd510fa9.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97fd529384.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97fd79de62.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97fd7d72de.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97fd7eb107.webp', type: 'image' },
     ],
   },
   {
@@ -94,9 +125,11 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     desc: '很喜欢，和一个老哥相互劝着赶了这趟车。等待了40天的工期，终于收到了货，之后找一个厂子做个阳极。',
     layout: '75',
     medias: [
-      { src: 'https://placehold.co/600x400?text=KB3-1', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB3-2', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB3-3', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98554f0430.jpg', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a9855527566.jpg', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a9855512bc4.jpg', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98554ed5b9.jpg', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a9855567a3f.jpg', type: 'image' },
     ],
   },
   {
@@ -105,9 +138,15 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     desc: '又看到了阳极，收一把回来拿拿味儿...',
     layout: '75',
     medias: [
-      { src: 'https://placehold.co/600x400?text=KB3-1', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB3-2', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB3-3', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97a7783030.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97a7820fb1.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97c097944d.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97c0974bb4.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97c096f8be.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97c1706815.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a980a50fce7.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a9809f132c7.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a980a4f25c4.webp', type: 'image' },
     ],
   },
   {
@@ -116,9 +155,12 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     desc: '终于等到了一把好价阳极色，收！可惜不是长春花蓝，这个紫色偏玫红色，但无伤大雅。',
     layout: '75',
     medias: [
-      { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-3', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97a77525e4.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97a7731c05.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98161a4b55.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98161adbb6.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98161ad7fb.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98161ae603.webp', type: 'image' },
     ],
   },
   {
@@ -127,9 +169,14 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     desc: '最近关注到了TKD的Pt.1/75，在无棉top里好像评价很高，奈何阳极很难收到，先收一把喷涂帆布蓝回来把玩一下。',
     layout: '75',
     medias: [
-      { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-3', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97a775263b.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a97a791f50d.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a981ff7d1ad.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a981ff9b65a.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a981ff8af55.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a981ff9b688.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a981ff9b6ae.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98200bb4c1.webp', type: 'image' },
     ],
   },
   {
@@ -139,9 +186,12 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     featured: true,
     layout: '75',
     medias: [
-      { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-3', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a9900416066.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98e6a2290b.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98e6a266c0.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98e6a23ce5.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98e6a263e4.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98e6a45bbb.webp', type: 'image' },
     ],
   },
   {
@@ -150,9 +200,16 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     desc: '第一把Alice，我的评价是外观确实帅的，但需要时间适应，不然老要按错键()',
     layout: 'Alice',
     medias: [
-      { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-3', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a998dc946be.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a998e8532d5.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a998b00404a.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a998ab5121d.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a998ab51870.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a998ab48fec.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a998ab58958.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a998b310dd3.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a998c31364b.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a998e8363a0.webp', type: 'image' },
     ],
   },
   {
@@ -161,9 +218,15 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     desc: '看了老卡的视频，又上头了，等了一个月还没有想要的灰金，先收一把阳极深蓝吧。',
     layout: '75',
     medias: [
-      { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-3', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a9875e402f8.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a9875d92194.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a9875ed1fb5.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a9876753f11.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98767a55e1.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a9876d45d95.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a9877d3522e.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98757872bb.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a987649e803.webp', type: 'image' },
     ],
   },
   {
@@ -173,9 +236,16 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     featured: true,
     layout: '60',
     medias: [
-      { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-3', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98c8d9e1ae.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98c8da325b.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98c8e0873e.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98c8f30021.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98c8c120e3.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98c8c201cf.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98c8c22a18.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98c8c47e7f.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98c8c42424.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98c8d94dcc.webp', type: 'image' },
     ],
   },
   {
@@ -184,9 +254,16 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     desc: '第一把60配列wkl，Neo同一时期的两把cu凑齐了算是，翻过来看真的好帅。',
     layout: '60',
     medias: [
-      { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-3', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a99094448a9.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a990953d86d.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a9908fceb43.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a99094676ba.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a9908fb7bfc.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a990957cd06.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a99095aaf41.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a99095e1cdf.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a994300fc87.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a994300cf8e.webp', type: 'image' },
     ],
   },
   {
@@ -196,9 +273,14 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     featured: true,
     layout: '65',
     medias: [
-      { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-3', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98c4401b8c.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98c4462fe2.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98c440a9ce.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98c44f24be.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98c44b0d18.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98c45970f0.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98c45c68a5.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98c46cf432.webp', type: 'image' },
     ],
   },
   {
@@ -207,9 +289,16 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     desc: '游戏界谁人不知ROG，试试这种电竞类键盘怎么样。最初是被他的改色计划吸引的，但是还是忍住了哈哈哈。',
     layout: '75',
     medias: [
-      { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-3', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa33e7d10ce.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa33e7daab7.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa33ec03ef4.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa33e6228a5.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa33e7d3e4a.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa33eaa59b7.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa33eb354bb.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa33eaee513.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa33ea0a653.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa33e8a2a51.jpg', type: 'image' },
     ],
   },
   {
@@ -218,9 +307,14 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     desc: '偶尔买点亲民的小玩具，yysy不错的，日常使用随便造了。',
     layout: '65',
     medias: [
-      { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-3', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa33078bc5e.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa3308682e8.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa330c94329.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa33094c4fe.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa3309931ff.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa330997057.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa330a586fc.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa330ae70b0.jpg', type: 'image' },
     ],
   },
   {
@@ -229,9 +323,14 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     desc: '第一把65配列，Nape家的taku65不必多说了，千元可玩性很高的套件，只是一直没有想要的山竹紫，最近遇到了，那只能狠狠拿下了。',
     layout: '65',
     medias: [
-      { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-3', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a99d8c710a0.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a99d8c4a938.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a99d8c81b18.webp', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa31a29b225.webp', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa31a2df8e8.webp', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa31a1d4f19.webp', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa31a3039c4.webp', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa31a29884f.webp', type: 'image' },
     ],
   },
   {
@@ -241,9 +340,10 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     layout: '80',
     featured: true,
     medias: [
-      { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-3', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98e35585bc.webp', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa377a42054.jpg', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98e3550a53.webp', type: 'image' },
+      { src: 'https://wmimg.com/i/1546/2026/03/69a98e35584e9.webp', type: 'image' },
     ],
   },
   {
@@ -252,9 +352,14 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     desc: '没想到不到半个月就开始铝坨坨了，先从千元内最具性价比的套件入门！！！',
     layout: '80',
     medias: [
-      { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-3', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa32794b185.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa3279c698b.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa32782ee64.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa32765fe98.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa327748dbd.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa3277e090f.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa3278ce44d.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa3275acab8.jpg', type: 'image' },
     ],
   },
   {
@@ -263,20 +368,19 @@ const rawKeyboardEvents: KeyboardEntry[] = [
     desc: '看看量产头部企业的实力奥，我的评价是挺好的。',
     layout: '75',
     medias: [
-      { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-3', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa356f89cb8.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa3232ba140.jpg', type: 'image' },
     ],
   },
   {
     date: '2025-05-13',
-    title: '珂芝 98v2',
+    title: '珂芝 k98v2',
     desc: '入坑机械键盘，从薄膜键盘正式毕业。导火索：大创经费还剩一点，打算用掉买一把胶坨坨机械键盘，不用白不用。',
     layout: '98',
     medias: [
-      { src: 'https://placehold.co/600x400?text=KB1-1', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-2', type: 'image' },
-      { src: 'https://placehold.co/600x400?text=KB1-3', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa3636234b9.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa35c7b308c.jpg', type: 'image' },
+      { src: 'https://free.picui.cn/free/2026/03/06/69aa35c76882f.jpg', type: 'image' },
     ],
   },
 ]
@@ -284,12 +388,13 @@ const rawKeyboardEvents: KeyboardEntry[] = [
 const keyboardEvents: KeyboardEntryVM[] = [...rawKeyboardEvents]
   .map((e, idx) => {
     const ts = parseDateLocal(e.date).getTime()
-    const y = (e.date.match(/^(\d{4})/)?.[1]) ?? '0000'
+    const parts = parseDateParts(e.date)
+
     return {
       ...e,
       id: `${ts}-${idx}`,
       ts,
-      year: y,
+      year: parts?.year ?? '0000',
       dateLabel: formatDate(e.date),
       layoutTag: e.layout ?? null,
     }
@@ -305,6 +410,7 @@ const mainIds = new Set(mainKeyboards.map(e => e.id))
 const playedAll: KeyboardEntryVM[] = keyboardEvents.filter(e => !mainIds.has(e.id))
 
 type EmblaApiLike = any
+
 interface CarouselInstance {
   emblaRef: ReturnType<typeof emblaCarouselVue>[0]
   emblaApi: ReturnType<typeof emblaCarouselVue>[1]
@@ -314,6 +420,10 @@ interface CarouselInstance {
 
 function getAutoplay(api: EmblaApiLike) {
   return (api?.plugins?.() as any)?.autoplay
+}
+
+function resetAutoplay(api: EmblaApiLike) {
+  getAutoplay(api)?.reset?.()
 }
 
 type CarouselMakeOpts = {
@@ -377,21 +487,23 @@ function makeCarousel(opts: CarouselMakeOpts = {}): CarouselInstance {
 const mainCarousels: CarouselInstance[] = mainKeyboards.map(() =>
   makeCarousel({ autoplay: true, stopOnInteraction: false, stopOnMouseEnter: true }),
 )
-const mainViewportRefs = ref<(HTMLElement | null)[]>([])
-let mainAutoplayObserver: IntersectionObserver | null = null
 
-function bindMainViewport(index: number) {
-  return (el: Element | null) => {
-    mainCarousels[index].emblaRef.value = el as HTMLElement | null
-    mainViewportRefs.value[index] = el as HTMLElement | null
-  }
-}
+const mainViewportRefs = ref<(HTMLElement | null)[]>([])
+const mainViewportBinders = mainCarousels.map(
+  (carousel, index) => (el: Element | null) => {
+    const target = el as HTMLElement | null
+    carousel.emblaRef.value = target
+    mainViewportRefs.value[index] = target
+  },
+)
+
+let mainAutoplayObserver: IntersectionObserver | null = null
 
 function scrollToSlideMain(mainIndex: number, snapIndex: number) {
   const api = mainCarousels[mainIndex]?.emblaApi.value as EmblaApiLike
   if (!api) return
   api.scrollTo(snapIndex)
-  getAutoplay(api)?.reset?.()
+  resetAutoplay(api)
 }
 
 const q = ref('')
@@ -405,15 +517,24 @@ const yearSelectRef = ref<HTMLElement | null>(null)
 const layoutSelectRef = ref<HTMLElement | null>(null)
 
 const yearLabel = computed(() => (year.value === 'all' ? '年份' : year.value))
-const layoutLabel = computed(() => (layout.value === 'all' ? '配列' : `${layout.value}%`))
+const layoutLabel = computed(() => (layout.value === 'all' ? '配列' : formatLayoutLabel(layout.value)))
 
-const pageSize = 24
-const visibleCount = ref(pageSize)
+const visibleCount = ref(PAGE_SIZE)
 
 const layoutOptions = computed(() => {
   const s = new Set<string>()
   playedAll.forEach(e => e.layoutTag && s.add(e.layoutTag))
-  return Array.from(s).sort((a, b) => Number(a) - Number(b))
+  return Array.from(s).sort((a, b) => {
+    const na = Number(a)
+    const nb = Number(b)
+    const aIsNum = !Number.isNaN(na)
+    const bIsNum = !Number.isNaN(nb)
+
+    if (aIsNum && bIsNum) return na - nb
+    if (aIsNum) return -1
+    if (bIsNum) return 1
+    return a.localeCompare(b, 'zh-Hans-CN')
+  })
 })
 
 const yearOptions = computed(() => {
@@ -426,8 +547,9 @@ const playedFiltered = computed(() => {
   const kw = q.value.trim().toLowerCase()
   const lay = layout.value
   const y = year.value
+
   return playedAll.filter(e => {
-    const hitKw = !kw || (e.title + ' ' + e.desc).toLowerCase().includes(kw)
+    const hitKw = !kw || `${e.title} ${e.desc}`.toLowerCase().includes(kw)
     const hitLay = lay === 'all' || e.layoutTag === lay
     const hitYear = y === 'all' || e.year === y
     return hitKw && hitLay && hitYear
@@ -438,7 +560,7 @@ const playedShown = computed(() => playedFiltered.value.slice(0, visibleCount.va
 const canLoadMore = computed(() => playedShown.value.length < playedFiltered.value.length)
 
 function loadMore() {
-  visibleCount.value = Math.min(visibleCount.value + pageSize, playedFiltered.value.length)
+  visibleCount.value = Math.min(visibleCount.value + PAGE_SIZE, playedFiltered.value.length)
 }
 
 function toggleYearDropdown() {
@@ -480,9 +602,6 @@ onBeforeUnmount(() => {
 })
 
 const filterKey = computed(() => `${q.value.trim().toLowerCase()}|${layout.value}|${year.value}`)
-watch(filterKey, () => {
-  visibleCount.value = pageSize
-})
 
 const wfVisibleIds = ref<Set<string>>(new Set())
 const wfRefs = ref<Record<string, HTMLElement | null>>({})
@@ -507,6 +626,7 @@ function setupWfObserver() {
 }
 
 watch(filterKey, async () => {
+  visibleCount.value = PAGE_SIZE
   wfVisibleIds.value = new Set()
   wfRefs.value = {}
   await nextTick()
@@ -523,7 +643,6 @@ const detailItem = ref<KeyboardEntryVM | null>(null)
 const lastActiveEl = ref<HTMLElement | null>(null)
 const closeBtnRef = ref<HTMLButtonElement | null>(null)
 
-// Detail carousel — managed manually via EmblaCarousel to avoid v-if/Transition timing issues
 const detailEmblaRef = ref<HTMLElement | null>(null)
 let detailEmblaApi: EmblaCarouselType | null = null
 const detailSelectedIndex = ref(0)
@@ -533,6 +652,88 @@ const detailHasVideo = computed(() => (detailItem.value?.medias ?? []).some(m =>
 const detailCanAutoplay = computed(() => {
   const medias = detailItem.value?.medias ?? []
   return medias.length > 1 && !detailHasVideo.value
+})
+
+function makeIndexSlot(index: number, media: KeyboardMedia): DetailThumbSlot {
+  return {
+    type: 'index',
+    key: `thumb-${index}`,
+    index,
+    media,
+  }
+}
+
+function makeEllipsisSlot(key: string): DetailThumbSlot {
+  return {
+    type: 'ellipsis',
+    key,
+  }
+}
+
+function makeEmptySlot(key: string): DetailThumbSlot {
+  return {
+    type: 'empty',
+    key,
+  }
+}
+
+const detailThumbSlots = computed<DetailThumbSlot[]>(() => {
+  const medias = detailItem.value?.medias ?? []
+  const total = medias.length
+  const current = Math.min(
+    Math.max(detailSelectedIndex.value, 0),
+    Math.max(total - 1, 0),
+  )
+
+  const slots: DetailThumbSlot[] = []
+
+  const fillEmpty = () => {
+    while (slots.length < DETAIL_THUMB_SLOT_COUNT) {
+      slots.push(makeEmptySlot(`empty-${slots.length}`))
+    }
+    return slots
+  }
+
+  if (!total) return fillEmpty()
+
+  if (total <= DETAIL_THUMB_SLOT_COUNT) {
+    medias.forEach((media, index) => {
+      slots.push(makeIndexSlot(index, media))
+    })
+    return fillEmpty()
+  }
+
+  if (current <= 3) {
+    slots.push(makeIndexSlot(0, medias[0]!))
+    slots.push(makeIndexSlot(1, medias[1]!))
+    slots.push(makeIndexSlot(2, medias[2]!))
+    slots.push(makeIndexSlot(3, medias[3]!))
+    slots.push(makeIndexSlot(4, medias[4]!))
+    slots.push(makeEllipsisSlot('ellipsis-end'))
+    slots.push(makeIndexSlot(total - 1, medias[total - 1]!))
+    return slots
+  }
+
+  if (current >= total - 4) {
+    slots.push(makeIndexSlot(0, medias[0]!))
+    slots.push(makeEllipsisSlot('ellipsis-start'))
+    slots.push(makeIndexSlot(total - 5, medias[total - 5]!))
+    slots.push(makeIndexSlot(total - 4, medias[total - 4]!))
+    slots.push(makeIndexSlot(total - 3, medias[total - 3]!))
+    slots.push(makeIndexSlot(total - 2, medias[total - 2]!))
+    slots.push(makeIndexSlot(total - 1, medias[total - 1]!))
+    return slots
+  }
+
+  slots.push(makeIndexSlot(0, medias[0]!))
+  slots.push(makeEllipsisSlot('ellipsis-start'))
+  slots.push(makeIndexSlot(current - 1, medias[current - 1]!))
+  slots.push(makeIndexSlot(current, medias[current]!))
+  slots.push(makeIndexSlot(current + 1, medias[current + 1]!))
+  slots.push(makeEllipsisSlot('ellipsis-end'))
+  slots.push(makeIndexSlot(total - 1, medias[total - 1]!))
+
+  return slots
 })
 
 function destroyDetailEmbla() {
@@ -556,11 +757,14 @@ function initDetailEmbla() {
 
   detailEmblaApi = EmblaCarousel(el, { loop: true, align: 'center', skipSnaps: false }, plugins)
 
-  const updateSelected = () => { detailSelectedIndex.value = detailEmblaApi!.selectedScrollSnap() }
+  const updateSelected = () => {
+    detailSelectedIndex.value = detailEmblaApi!.selectedScrollSnap()
+  }
   const updateSnaps = () => {
     detailScrollSnaps.value = detailEmblaApi!.scrollSnapList()
     updateSelected()
   }
+
   updateSnaps()
   detailEmblaApi.on('select', updateSelected)
   detailEmblaApi.on('reInit', updateSnaps)
@@ -579,19 +783,19 @@ function closeDetail() {
 function detailPrev() {
   if (!detailEmblaApi) return
   detailEmblaApi.scrollPrev()
-  getAutoplay(detailEmblaApi)?.reset?.()
+  resetAutoplay(detailEmblaApi)
 }
 
 function detailNext() {
   if (!detailEmblaApi) return
   detailEmblaApi.scrollNext()
-  getAutoplay(detailEmblaApi)?.reset?.()
+  resetAutoplay(detailEmblaApi)
 }
 
 function scrollToSlideDetail(snapIndex: number) {
   if (!detailEmblaApi) return
   detailEmblaApi.scrollTo(snapIndex)
-  getAutoplay(detailEmblaApi)?.reset?.()
+  resetAutoplay(detailEmblaApi)
 }
 
 async function onDetailAfterEnter() {
@@ -607,7 +811,6 @@ watch(
     if (open) {
       document.documentElement.classList.add('kb-lock')
       document.body.classList.add('kb-lock')
-      // Embla init is deferred to onDetailAfterEnter (after Transition completes)
       closeBtnRef.value?.focus?.()
     } else {
       document.documentElement.classList.remove('kb-lock')
@@ -693,10 +896,8 @@ const stats = computed(() => ({
 
 <template>
   <section class="kb-page">
-    <!-- Decorative grain overlay -->
     <div class="kb-grain" aria-hidden="true" />
 
-    <!-- Hero -->
     <header class="kb-hero">
       <div class="kb-hero__eyebrow">KEYBOARD COLLECTION</div>
       <h1 class="kb-hero__title">
@@ -705,7 +906,7 @@ const stats = computed(() => ({
       </h1>
       <p class="kb-hero__subtitle">每一把键盘都是一段故事，记录从入坑到深陷的客制化之旅。</p>
 
-      <div class="kb-stats" aria-label="��计">
+      <div class="kb-stats" aria-label="统计">
         <div class="kb-stat">
           <span class="kb-stat__number">{{ stats.total }}</span>
           <span class="kb-stat__label">TOTAL</span>
@@ -723,7 +924,6 @@ const stats = computed(() => ({
       </div>
     </header>
 
-    <!-- Main keyboards -->
     <section class="kb-main">
       <header class="sec-head">
         <div class="sec-head__line" />
@@ -749,7 +949,7 @@ const stats = computed(() => ({
           <div class="main-card__media" @click.stop>
             <div class="carousel">
               <div
-                :ref="bindMainViewport(index)"
+                :ref="mainViewportBinders[index]"
                 class="carousel-viewport"
                 :data-carousel-index="index"
               >
@@ -800,7 +1000,7 @@ const stats = computed(() => ({
               <span class="badge">FEATURED</span>
               <span class="chip">{{ item.dateLabel }}</span>
               <span v-if="item.layoutTag" class="chip chip-strong">
-                {{ isNaN(Number(item.layoutTag)) ? item.layoutTag : `${item.layoutTag}%` }}
+                {{ formatLayoutLabel(item.layoutTag) }}
               </span>
             </div>
 
@@ -817,7 +1017,6 @@ const stats = computed(() => ({
       </div>
     </section>
 
-    <!-- Played waterfall -->
     <section class="kb-played">
       <header class="played-head">
         <div class="played-head__top">
@@ -860,7 +1059,7 @@ const stats = computed(() => ({
                     class="select-option"
                     :class="{ 'is-active': year === 'all' }"
                     role="option"
-                    aria-selected="year === 'all'"
+                    :aria-selected="year === 'all'"
                     @click.stop="selectYear('all')"
                   >
                     全部
@@ -906,7 +1105,7 @@ const stats = computed(() => ({
                     class="select-option"
                     :class="{ 'is-active': layout === 'all' }"
                     role="option"
-                    aria-selected="layout === 'all'"
+                    :aria-selected="layout === 'all'"
                     @click.stop="selectLayout('all')"
                   >
                     全部
@@ -921,7 +1120,7 @@ const stats = computed(() => ({
                     :aria-selected="layout === opt"
                     @click.stop="selectLayout(opt)"
                   >
-                    {{ opt }}%
+                    {{ formatLayoutLabel(opt) }}
                   </li>
                 </ul>
               </Transition>
@@ -930,7 +1129,7 @@ const stats = computed(() => ({
         </div>
       </header>
 
-      <div class="waterfall" aria-label="瀑布流列表">
+      <div class="waterfall" aria-label="键盘列表">
         <button
           v-for="(item, idx) in playedShown"
           :key="item.id"
@@ -944,7 +1143,7 @@ const stats = computed(() => ({
         >
           <div class="wf-cover">
             <img
-              v-if="item.medias?.[0]?.type === 'image'"
+              v-if="item.medias?.[0]?.type === 'image' && item.medias?.[0]?.src"
               :src="item.medias[0].src"
               :alt="item.title"
               loading="lazy"
@@ -952,7 +1151,7 @@ const stats = computed(() => ({
               @dragstart.prevent
             >
             <video
-              v-else-if="item.medias?.[0]?.type === 'video'"
+              v-else-if="item.medias?.[0]?.type === 'video' && item.medias?.[0]?.src"
               :src="item.medias[0].src"
               muted
               playsinline
@@ -971,12 +1170,11 @@ const stats = computed(() => ({
             <div class="wf-top">
               <span class="wf-chip">{{ item.dateLabel }}</span>
               <span v-if="item.layoutTag" class="wf-chip wf-chip-strong">
-                {{ isNaN(Number(item.layoutTag)) ? item.layoutTag : `${item.layoutTag}%` }}
+                {{ formatLayoutLabel(item.layoutTag) }}
               </span>
             </div>
 
             <h3 class="wf-title">{{ item.title }}</h3>
-            <p class="wf-desc">{{ item.desc }}</p>
           </div>
         </button>
       </div>
@@ -994,7 +1192,6 @@ const stats = computed(() => ({
       </div>
     </section>
 
-    <!-- Detail Modal -->
     <Teleport to="body">
       <Transition name="mask-fade">
         <div
@@ -1017,7 +1214,7 @@ const stats = computed(() => ({
                   <span class="badge badge-soft">DETAIL</span>
                   <span v-if="detailItem?.dateLabel" class="chip">{{ detailItem.dateLabel }}</span>
                   <span v-if="detailItem?.layoutTag" class="chip chip-strong">
-                    {{ isNaN(Number(detailItem.layoutTag)) ? detailItem.layoutTag : `${detailItem.layoutTag}%` }}
+                    {{ formatLayoutLabel(detailItem.layoutTag) }}
                   </span>
                   <span v-if="detailItem && detailCanAutoplay" class="chip chip-auto">AUTO</span>
                 </div>
@@ -1059,7 +1256,7 @@ const stats = computed(() => ({
                         >
                           <div class="detail-inner">
                             <img
-                              v-if="m.type === 'image'"
+                              v-if="m.type === 'image' && m.src"
                               :src="m.src"
                               :alt="`${detailItem.title} - ${mIndex + 1}`"
                               loading="lazy"
@@ -1067,11 +1264,12 @@ const stats = computed(() => ({
                               @dragstart.prevent
                             >
                             <video
-                              v-else
+                              v-else-if="m.type === 'video' && m.src"
                               :src="m.src"
                               controls
                               playsinline
                             />
+                            <div v-else class="wf-cover__empty" />
                           </div>
                         </div>
                       </div>
@@ -1099,25 +1297,41 @@ const stats = computed(() => ({
                   </div>
 
                   <div v-if="detailItem.medias.length > 1" class="thumbs" aria-label="缩略图">
-                    <button
-                      v-for="(m, i) in detailItem.medias"
-                      :key="i"
-                      class="thumb"
-                      :class="{ active: detailSelectedIndex === i }"
-                      type="button"
-                      :aria-label="`查看第 ${i + 1} 张`"
-                      @click="scrollToSlideDetail(i)"
-                    >
-                      <img
-                        v-if="m.type === 'image'"
-                        :src="m.src"
-                        :alt="`thumb-${i + 1}`"
-                        loading="lazy"
-                        draggable="false"
-                        @dragstart.prevent
+                    <template v-for="slot in detailThumbSlots" :key="slot.key">
+                      <button
+                        v-if="slot.type === 'index'"
+                        class="thumb"
+                        :class="{ active: detailSelectedIndex === slot.index }"
+                        type="button"
+                        :aria-label="`查看第 ${slot.index + 1} 张`"
+                        @click="scrollToSlideDetail(slot.index)"
+                      >
+                        <img
+                          v-if="slot.media.type === 'image' && slot.media.src"
+                          :src="slot.media.src"
+                          :alt="`thumb-${slot.index + 1}`"
+                          loading="lazy"
+                          draggable="false"
+                          @dragstart.prevent
+                        >
+                        <div v-else-if="slot.media.type === 'video' && slot.media.src" class="thumb-video">VIDEO</div>
+                        <div v-else class="thumb-video">EMPTY</div>
+                      </button>
+
+                      <span
+                        v-else-if="slot.type === 'ellipsis'"
+                        class="thumb thumb--ellipsis"
+                        aria-hidden="true"
+                      >
+                        …
+                      </span>
+
+                      <span
+                        v-else
+                        class="thumb thumb--empty"
+                        aria-hidden="true"
                       />
-                      <div v-else class="thumb-video">VIDEO</div>
-                    </button>
+                    </template>
                   </div>
                 </div>
               </div>
@@ -1130,29 +1344,39 @@ const stats = computed(() => ({
 </template>
 
 <style lang="scss" scoped>
-/* Scroll lock */
 :global(html.kb-lock),
-:global(body.kb-lock) { overflow: hidden; }
+:global(body.kb-lock) {
+  overflow: hidden;
+}
 
-/* ──── Keyframes ──── */
+:where(.kb-page, .drawer)
+  :where(button, input, select, textarea, a, [role="button"], [tabindex]) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:where(.kb-page, .drawer)
+  :where(button, input, select, textarea, a, [role="button"], [tabindex]):focus,
+:where(.kb-page, .drawer)
+  :where(button, input, select, textarea, a, [role="button"], [tabindex]):focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-@keyframes shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-@keyframes lineGrow {
-  from { transform: scaleX(0); }
-  to   { transform: scaleX(1); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* ──── Grain overlay ──── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes lineGrow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
 .kb-grain {
   position: fixed;
   inset: 0;
@@ -1164,11 +1388,11 @@ const stats = computed(() => ({
   background-size: 180px;
 }
 
-/* ──── Page ──── */
 .kb-page {
   padding: 3rem 0 5rem;
   position: relative;
 }
+
 .kb-page::before {
   content: "";
   position: absolute;
@@ -1181,14 +1405,13 @@ const stats = computed(() => ({
   opacity: 1;
 }
 
-/* ──── Hero ──── */
 .kb-hero {
   max-width: 1100px;
   margin: 0 auto 3rem;
   padding: 0 1.25rem;
   text-align: center;
   position: relative;
-  animation: fadeUp 700ms cubic-bezier(.16,1,.3,1) both;
+  animation: fadeUp 700ms cubic-bezier(.16, 1, .3, 1) both;
 }
 
 .kb-hero__eyebrow {
@@ -1203,6 +1426,7 @@ const stats = computed(() => ({
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
+
   &::before,
   &::after {
     content: '';
@@ -1220,10 +1444,12 @@ const stats = computed(() => ({
   line-height: 1.08;
   margin: 0 0 1.2rem;
 }
+
 .kb-hero__title-line {
   display: block;
   color: var(--c-text);
 }
+
 .kb-hero__title-accent {
   display: block;
 }
@@ -1258,6 +1484,7 @@ const stats = computed(() => ({
   gap: 0.18rem;
   padding: 0 1.2rem;
 }
+
 .kb-stat__number {
   font-family: var(--font-monospace);
   font-size: 1.5rem;
@@ -1266,9 +1493,11 @@ const stats = computed(() => ({
   color: var(--c-text);
   line-height: 1;
 }
+
 .kb-stat--accent .kb-stat__number {
   color: var(--c-primary);
 }
+
 .kb-stat__label {
   font-family: var(--font-monospace);
   font-size: 0.6rem;
@@ -1277,6 +1506,7 @@ const stats = computed(() => ({
   text-transform: uppercase;
   color: var(--c-text-3);
 }
+
 .kb-stat__divider {
   width: 1px;
   height: 2.2rem;
@@ -1284,13 +1514,13 @@ const stats = computed(() => ({
   flex-shrink: 0;
 }
 
-/* ──── Section Head ──── */
 .sec-head {
   display: flex;
   align-items: center;
   gap: 1.2rem;
   margin-bottom: 1.5rem;
 }
+
 .sec-head__line {
   flex: 1;
   height: 1px;
@@ -1298,6 +1528,7 @@ const stats = computed(() => ({
   animation: lineGrow 800ms 300ms ease both;
   transform-origin: center;
 }
+
 .sec-head h2 {
   margin: 0;
   display: flex;
@@ -1306,6 +1537,7 @@ const stats = computed(() => ({
   gap: 0.15rem;
   flex-shrink: 0;
 }
+
 .sec-head__en {
   font-family: var(--font-monospace);
   font-size: 0.65rem;
@@ -1314,6 +1546,7 @@ const stats = computed(() => ({
   text-transform: uppercase;
   color: var(--c-primary);
 }
+
 .sec-head__cn {
   font-size: 1.3rem;
   font-weight: 950;
@@ -1321,12 +1554,12 @@ const stats = computed(() => ({
   color: var(--c-text);
 }
 
-/* ──── Main Grid ──── */
 .kb-main {
   max-width: 1100px;
   margin: 0 auto;
   padding: 0 1.25rem;
 }
+
 .main-grid {
   display: grid;
   gap: 1.25rem;
@@ -1344,9 +1577,8 @@ const stats = computed(() => ({
     0 0 0 1px color-mix(in srgb, var(--c-border) 6%, transparent),
     0 8px 26px color-mix(in srgb, var(--c-text) 4%, transparent);
   position: relative;
-
   transition: box-shadow 260ms ease, background-color 200ms ease, filter 200ms ease;
-  animation: fadeUp 600ms calc(var(--i, 0) * 80ms + 400ms) cubic-bezier(.16,1,.3,1) both;
+  animation: fadeUp 600ms calc(var(--i, 0) * 80ms + 400ms) cubic-bezier(.16, 1, .3, 1) both;
 
   &:hover {
     background: color-mix(in srgb, var(--c-bg-1) 98%, transparent);
@@ -1355,9 +1587,9 @@ const stats = computed(() => ({
       0 0 0 1px color-mix(in srgb, var(--c-border) 6%, transparent),
       0 10px 32px color-mix(in srgb, var(--c-text) 7%, transparent);
   }
+
   &:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--c-primary) 55%, transparent);
-    outline-offset: 3px;
+    outline: none;
   }
 }
 
@@ -1368,6 +1600,7 @@ const stats = computed(() => ({
   justify-content: center;
   padding: 0.5rem 0;
 }
+
 .meta-top {
   display: flex;
   align-items: center;
@@ -1387,6 +1620,7 @@ const stats = computed(() => ({
   padding: 0.2rem 0.6rem;
   border-radius: 999px;
 }
+
 .badge-soft {
   background: color-mix(in srgb, var(--c-primary) 10%, transparent);
 }
@@ -1401,10 +1635,12 @@ const stats = computed(() => ({
   padding: 0.15rem 0.5rem;
   border-radius: 999px;
 }
+
 .chip-strong {
   border-color: color-mix(in srgb, var(--c-primary) 35%, transparent);
   color: var(--c-primary);
 }
+
 .chip-auto {
   border-color: color-mix(in srgb, var(--c-accent, var(--c-primary)) 35%, transparent);
   color: var(--c-accent, var(--c-primary));
@@ -1421,12 +1657,14 @@ const stats = computed(() => ({
   text-wrap: balance;
   color: var(--c-text);
 }
+
 .desc {
   margin: 0;
   color: var(--c-text-2);
   line-height: 1.75;
   font-size: 0.92rem;
 }
+
 .meta-foot .hint {
   display: inline-flex;
   align-items: center;
@@ -1435,14 +1673,20 @@ const stats = computed(() => ({
   font-weight: 500;
   color: var(--c-text-3);
   transition: color 200ms ease;
+
   svg {
     opacity: 0.6;
     transition: transform 200ms ease, opacity 200ms ease;
   }
 }
+
 .main-card:hover .meta-foot .hint {
   color: var(--c-primary);
-  svg { opacity: 1; transform: translateX(2px); }
+
+  svg {
+    opacity: 1;
+    transform: translateX(2px);
+  }
 }
 
 .carousel {
@@ -1459,13 +1703,14 @@ const stats = computed(() => ({
   cursor: grab;
   position: relative;
   padding: 0.75rem 0;
-
   user-select: none;
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: pan-y;
 
-  &:active { cursor: grabbing; }
+  &:active {
+    cursor: grabbing;
+  }
 }
 
 .carousel-container {
@@ -1473,19 +1718,23 @@ const stats = computed(() => ({
   align-items: stretch;
   margin-left: -14px;
 }
+
 .carousel-slide {
   flex: 0 0 72%;
   min-width: 0;
   padding-left: 14px;
   box-sizing: border-box;
 }
+
 .carousel-slide__inner {
   border-radius: 0.85rem;
   overflow: hidden;
-  transition: opacity 300ms ease, transform 300ms cubic-bezier(.16,1,.3,1);
+  transition: opacity 300ms ease, transform 300ms cubic-bezier(.16, 1, .3, 1);
   will-change: transform, opacity;
 }
-.carousel-slide img, .carousel-slide video {
+
+.carousel-slide img,
+.carousel-slide video {
   display: block;
   width: 100%;
   height: 240px;
@@ -1503,6 +1752,7 @@ const stats = computed(() => ({
   opacity: 0.55;
   transform: scale(0.96);
 }
+
 .carousel-slide:not(.is-active) img,
 .carousel-slide:not(.is-active) video {
   filter: blur(6px) saturate(0.5);
@@ -1518,6 +1768,7 @@ const stats = computed(() => ({
   gap: 0.35rem;
   z-index: 3;
 }
+
 .carousel-dot {
   width: 6px;
   height: 6px;
@@ -1526,7 +1777,8 @@ const stats = computed(() => ({
   padding: 0;
   background: color-mix(in srgb, var(--c-text) 25%, transparent);
   cursor: pointer;
-  transition: all 220ms cubic-bezier(.16,1,.3,1);
+  transition: all 220ms cubic-bezier(.16, 1, .3, 1);
+
   &.active {
     width: 22px;
     background: var(--c-primary);
@@ -1539,21 +1791,25 @@ const stats = computed(() => ({
   margin: 0 auto;
   padding: 0 1.25rem;
 }
+
 .played-head {
   margin: 3rem 0 1.4rem;
   display: grid;
   gap: 1.1rem;
 }
+
 .played-head__top {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 0.75rem;
 }
+
 .played-head__title-group {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+
   h2 {
     margin: 0;
     font-size: 1.35rem;
@@ -1562,6 +1818,7 @@ const stats = computed(() => ({
     color: var(--c-text);
   }
 }
+
 .played-head__en {
   font-family: var(--font-monospace);
   font-size: 0.62rem;
@@ -1605,11 +1862,13 @@ const stats = computed(() => ({
   --ctrl-shadow: 0 1px 8px color-mix(in srgb, var(--c-text) 5%, transparent);
   --ctrl-shadow-hover: 0 10px 26px color-mix(in srgb, var(--c-text) 10%, transparent);
 }
+
 .search {
   position: relative;
   flex: 1;
   min-width: 180px;
 }
+
 .search-icon {
   position: absolute;
   left: 0.85rem;
@@ -1619,9 +1878,11 @@ const stats = computed(() => ({
   pointer-events: none;
   transition: color 200ms ease;
 }
+
 .search:focus-within .search-icon {
   color: var(--c-primary);
 }
+
 .search input {
   width: 100%;
   box-sizing: border-box;
@@ -1639,27 +1900,35 @@ const stats = computed(() => ({
     border-color 200ms ease,
     box-shadow 200ms ease,
     background 200ms ease;
+
   &:hover {
     background: var(--ctrl-bg-hover);
     box-shadow: var(--ctrl-shadow-hover);
   }
+
   &:active {
     box-shadow: var(--ctrl-shadow);
   }
+
   &:focus {
     border-color: color-mix(in srgb, var(--c-primary) 35%, var(--c-border));
-    box-shadow: var(--ctrl-shadow-hover);
     background: var(--ctrl-bg-hover);
   }
-  &::placeholder { color: var(--c-text-3); }
+
+  &::placeholder {
+    color: var(--c-text-3);
+  }
 }
+
 .select-group {
   display: flex;
   gap: 0.5rem;
 }
+
 .select {
   position: relative;
   border-radius: var(--ctrl-r);
+
   &::before {
     content: '';
     position: absolute;
@@ -1670,6 +1939,7 @@ const stats = computed(() => ({
     background: radial-gradient(120% 140% at 20% 0%, color-mix(in srgb, var(--c-primary) 16%, transparent), transparent 55%);
     transition: opacity 220ms ease;
   }
+
   &::after {
     content: '';
     position: absolute;
@@ -1682,23 +1952,28 @@ const stats = computed(() => ({
     -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center / 100%;
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center / 100%;
     pointer-events: none;
-    transition: background-color 200ms ease, transform 220ms cubic-bezier(.16,1,.3,1);
+    transition: background-color 200ms ease, transform 220ms cubic-bezier(.16, 1, .3, 1);
   }
+
   &:hover::after {
     background-color: var(--c-primary);
   }
+
   &:focus-within::after {
     background-color: var(--c-primary);
     transform: translateY(-50%) rotate(180deg);
   }
+
   &:hover::before,
   &:focus-within::before {
     opacity: 1;
   }
 }
+
 .select--custom {
   min-width: 7.5rem;
 }
+
 .select-trigger {
   width: 100%;
   box-sizing: border-box;
@@ -1725,23 +2000,27 @@ const stats = computed(() => ({
   justify-content: flex-start;
   gap: 0.25rem;
   transition:
-    transform 220ms cubic-bezier(.16,1,.3,1),
+    transform 220ms cubic-bezier(.16, 1, .3, 1),
     border-color 200ms ease,
-    box-shadow 220ms cubic-bezier(.16,1,.3,1),
+    box-shadow 220ms cubic-bezier(.16, 1, .3, 1),
     background 200ms ease;
 }
+
 .select-trigger__label {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .select--custom:hover .select-trigger {
   background: var(--ctrl-bg-hover);
   box-shadow: var(--ctrl-shadow-hover);
 }
+
 .select--custom:active .select-trigger {
   box-shadow: var(--ctrl-shadow);
 }
+
 .select-menu {
   position: absolute;
   z-index: 10;
@@ -1763,6 +2042,7 @@ const stats = computed(() => ({
   max-height: 13rem;
   overflow: auto;
 }
+
 .select-option {
   padding: 0.4rem 0.7rem;
   border-radius: 999px;
@@ -1776,6 +2056,7 @@ const stats = computed(() => ({
   gap: 0.4rem;
   transition: background 160ms ease, color 160ms ease;
 }
+
 .select-option::after {
   content: '';
   width: 0.55rem;
@@ -1785,77 +2066,44 @@ const stats = computed(() => ({
   box-shadow: 0 0 0 0 transparent;
   transition: background 180ms ease, box-shadow 180ms ease;
 }
+
 .select-option:hover {
   background: color-mix(in srgb, var(--c-primary) 10%, transparent);
   color: var(--c-text);
 }
+
 .select-option.is-active {
   background: color-mix(in srgb, var(--c-primary) 18%, transparent);
   color: var(--c-text);
 }
+
 .select-option.is-active::after {
   background: var(--c-primary);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 35%, transparent);
 }
+
 .select-pop-enter-active,
 .select-pop-leave-active {
-  transition: transform 200ms cubic-bezier(.16,1,.3,1), opacity 200ms ease;
+  transition: transform 200ms cubic-bezier(.16, 1, .3, 1), opacity 200ms ease;
   transform-origin: top center;
 }
+
 .select-pop-enter-from,
 .select-pop-leave-to {
   opacity: 0;
   transform: translateY(-4px) scale(0.97);
 }
-.select select {
-  appearance: none;
-  -webkit-appearance: none;
-  box-sizing: border-box;
-  height: var(--ctrl-h);
-  padding: 0.65rem 2.6rem 0.65rem 0.95rem;
-  border-radius: var(--ctrl-r);
-  border: 1px solid var(--ctrl-border);
-  background: var(--ctrl-bg);
-  backdrop-filter: blur(10px);
-  box-shadow: var(--ctrl-shadow);
-  color: var(--c-text);
-  font-size: 0.86rem;
-  font-weight: 500;
-  font-family: inherit;
-  line-height: 1.15;
-  cursor: pointer;
-  outline: none;
-  background-clip: padding-box;
-  transition:
-    border-color 200ms ease,
-    box-shadow 200ms ease,
-    background 200ms ease;
-  &:hover {
-    background: var(--ctrl-bg-hover);
-    box-shadow: var(--ctrl-shadow-hover);
-  }
-  &:active {
-    box-shadow: var(--ctrl-shadow);
-  }
-  &:focus {
-    border-color: color-mix(in srgb, var(--c-primary) 35%, var(--c-border));
-    box-shadow: var(--ctrl-shadow-hover);
-    background: var(--ctrl-bg-hover);
-  }
-}
 
-/* ──── Waterfall ──── */
 .waterfall {
   margin-top: 1.2rem;
-  column-count: 3;
-  column-gap: 1.1rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.1rem;
 }
 
 .wf-card {
   width: 100%;
   text-align: left;
-  break-inside: avoid;
-  margin: 0 0 1.1rem;
   border-radius: 0.9rem;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--c-border) 60%, transparent);
@@ -1864,12 +2112,11 @@ const stats = computed(() => ({
     0 1px 2px color-mix(in srgb, var(--c-text) 2%, transparent),
     0 10px 28px color-mix(in srgb, var(--c-text) 5%, transparent);
   cursor: pointer;
-
   opacity: 0;
   transform: translateY(20px);
   transition:
     opacity 550ms ease,
-    transform 550ms cubic-bezier(.16,1,.3,1),
+    transform 550ms cubic-bezier(.16, 1, .3, 1),
     border-color 200ms ease,
     box-shadow 300ms ease;
   transition-delay: var(--d, 0ms);
@@ -1877,6 +2124,7 @@ const stats = computed(() => ({
   &.is-visible {
     opacity: 1;
     transform: translateY(0);
+
     &:hover {
       background: color-mix(in srgb, var(--c-bg-1) 98%, transparent);
       filter: contrast(0.96);
@@ -1891,14 +2139,21 @@ const stats = computed(() => ({
   position: relative;
   overflow: hidden;
 }
-.wf-cover img, .wf-cover video {
+
+.wf-cover img,
+.wf-cover video {
   display: block;
   width: 100%;
   height: 175px;
   object-fit: cover;
-  transition: transform 400ms cubic-bezier(.16,1,.3,1), filter 300ms ease;
+  transition: transform 400ms cubic-bezier(.16, 1, .3, 1), filter 300ms ease;
 }
-.wf-cover img { -webkit-user-drag: none; user-drag: none; }
+
+.wf-cover img {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+
 .wf-card.is-visible:hover .wf-cover img,
 .wf-card.is-visible:hover .wf-cover video {
   transform: scale(1.06);
@@ -1906,11 +2161,13 @@ const stats = computed(() => ({
 
 .wf-cover__empty {
   height: 175px;
-  background: linear-gradient(135deg,
+  background: linear-gradient(
+    135deg,
     color-mix(in srgb, var(--c-bg-2) 100%, transparent),
     color-mix(in srgb, var(--c-bg-3) 100%, transparent)
   );
 }
+
 .wf-cover__overlay {
   position: absolute;
   inset: 0;
@@ -1921,7 +2178,11 @@ const stats = computed(() => ({
   opacity: 0;
   transition: opacity 280ms ease;
 }
-.wf-card.is-visible:hover .wf-cover__overlay { opacity: 1; }
+
+.wf-card.is-visible:hover .wf-cover__overlay {
+  opacity: 1;
+}
+
 .wf-view {
   display: inline-flex;
   align-items: center;
@@ -1936,8 +2197,9 @@ const stats = computed(() => ({
   backdrop-filter: blur(10px);
   box-shadow: 0 2px 12px color-mix(in srgb, var(--c-text) 8%, transparent);
   transform: translateY(4px);
-  transition: transform 280ms cubic-bezier(.16,1,.3,1);
+  transition: transform 280ms cubic-bezier(.16, 1, .3, 1);
 }
+
 .wf-card.is-visible:hover .wf-view {
   transform: translateY(0);
 }
@@ -1947,12 +2209,14 @@ const stats = computed(() => ({
   display: grid;
   gap: 0.55rem;
 }
+
 .wf-top {
   display: flex;
   gap: 0.45rem;
   align-items: center;
   flex-wrap: wrap;
 }
+
 .wf-chip {
   font-family: var(--font-monospace);
   font-size: 0.68rem;
@@ -1963,10 +2227,12 @@ const stats = computed(() => ({
   border: 1px solid color-mix(in srgb, var(--c-border) 50%, transparent);
   background: color-mix(in srgb, var(--c-bg-1) 60%, transparent);
 }
+
 .wf-chip-strong {
   border-color: color-mix(in srgb, var(--c-primary) 35%, transparent);
   color: var(--c-primary);
 }
+
 .wf-title {
   margin: 0;
   font-size: 1rem;
@@ -1976,23 +2242,13 @@ const stats = computed(() => ({
   text-wrap: balance;
   color: var(--c-text);
 }
-.wf-desc {
-  margin: 0;
-  color: var(--c-text-2);
-  line-height: 1.7;
-  font-size: 0.88rem;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
 
-/* ──── Load More / Empty ──── */
 .load-more {
   margin: 1.5rem 0 0;
   display: grid;
   place-items: center;
 }
+
 .btn-load {
   display: inline-flex;
   align-items: center;
@@ -2007,15 +2263,18 @@ const stats = computed(() => ({
   font-weight: 600;
   color: var(--c-text);
   transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease, background 200ms ease;
+
   &:hover {
     transform: translateY(-2px);
     border-color: color-mix(in srgb, var(--c-primary) 30%, var(--c-border));
     background: color-mix(in srgb, var(--c-primary) 5%, var(--c-bg-1));
     box-shadow: 0 8px 28px color-mix(in srgb, var(--c-text) 6%, transparent);
   }
+
   svg {
     transition: transform 200ms ease;
   }
+
   &:hover svg {
     transform: translateY(2px);
   }
@@ -2029,10 +2288,12 @@ const stats = computed(() => ({
   gap: 0.75rem;
   color: var(--c-text-3);
   text-align: center;
-  span { font-size: 0.9rem; }
+
+  span {
+    font-size: 0.9rem;
+  }
 }
 
-/* ──── Modal ──── */
 .drawer-mask {
   position: fixed;
   inset: 0;
@@ -2044,6 +2305,7 @@ const stats = computed(() => ({
   backdrop-filter: blur(16px) saturate(1.2);
   overscroll-behavior: contain;
 }
+
 .drawer {
   width: min(1100px, 96vw);
   max-height: calc(100vh - 3rem);
@@ -2053,13 +2315,14 @@ const stats = computed(() => ({
   backdrop-filter: blur(24px);
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--c-border) 10%, transparent),
-    0 1px 3px rgba(0,0,0,0.08),
-    0 8px 32px rgba(0,0,0,0.12),
-    0 32px 120px rgba(0,0,0,0.3);
+    0 1px 3px rgba(0, 0, 0, 0.08),
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    0 32px 120px rgba(0, 0, 0, 0.3);
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
+
 .drawer-head {
   flex: 0 0 auto;
   display: flex;
@@ -2070,6 +2333,7 @@ const stats = computed(() => ({
   border-bottom: 1px solid color-mix(in srgb, var(--c-border) 30%, transparent);
   background: color-mix(in srgb, var(--c-bg) 80%, transparent);
 }
+
 .drawer-head__meta {
   display: flex;
   align-items: center;
@@ -2088,6 +2352,7 @@ const stats = computed(() => ({
   place-items: center;
   transition: transform 200ms ease, border-color 200ms ease, background 200ms ease, color 200ms ease;
   color: var(--c-text-3);
+
   &:hover {
     transform: scale(1.08);
     border-color: color-mix(in srgb, var(--c-primary) 35%, var(--c-border));
@@ -2104,6 +2369,7 @@ const stats = computed(() => ({
   gap: 1.5rem;
   padding: 1.5rem;
 }
+
 .drawer-left {
   display: flex;
   flex-direction: column;
@@ -2111,6 +2377,7 @@ const stats = computed(() => ({
   gap: 0.75rem;
   padding: 0.5rem 0;
 }
+
 .drawer-title {
   margin: 0;
   font-size: 1.5rem;
@@ -2120,12 +2387,14 @@ const stats = computed(() => ({
   color: var(--c-text);
   text-wrap: balance;
 }
+
 .drawer-desc {
   margin: 0;
   color: var(--c-text-2);
   line-height: 1.85;
   font-size: 0.93rem;
 }
+
 .drawer-note {
   margin-top: 0.75rem;
   display: inline-flex;
@@ -2138,7 +2407,11 @@ const stats = computed(() => ({
   padding: 0.6rem 0.85rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--c-bg-1) 40%, transparent);
-  svg { flex-shrink: 0; opacity: 0.5; }
+
+  svg {
+    flex-shrink: 0;
+    opacity: 0.5;
+  }
 }
 
 .drawer-carousel {
@@ -2158,48 +2431,58 @@ const stats = computed(() => ({
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: pan-y pinch-zoom;
-  &:active { cursor: grabbing; }
+
+  &:active {
+    cursor: grabbing;
+  }
 }
+
 .detail-container {
   display: flex;
   align-items: stretch;
   margin-left: -14px;
 }
+
 .detail-slide {
   flex: 0 0 80%;
   min-width: 0;
   padding-left: 14px;
   box-sizing: border-box;
 }
+
 .detail-inner {
   border-radius: 0.85rem;
   overflow: hidden;
-  transition: opacity 300ms ease, transform 300ms cubic-bezier(.16,1,.3,1);
+  transition: opacity 300ms ease, transform 300ms cubic-bezier(.16, 1, .3, 1);
   will-change: transform, opacity;
 }
+
 .detail-slide:not(.is-active) .detail-inner {
   opacity: 0.5;
   transform: scale(0.95);
 }
+
 .detail-slide:not(.is-active) .detail-inner img,
 .detail-slide:not(.is-active) .detail-inner video {
   filter: blur(4px) saturate(0.6);
   transform: scale(1.03);
 }
-.detail-inner img, .detail-inner video {
+
+.detail-inner img,
+.detail-inner video {
   height: 340px;
   width: 100%;
   object-fit: cover;
   display: block;
   transition: filter 300ms ease, transform 300ms ease;
 }
+
 .detail-inner img {
   -webkit-user-drag: none;
   user-drag: none;
   pointer-events: none;
 }
 
-/* ──── Nav Arrows ──── */
 .nav-arrows {
   position: absolute;
   inset: 0;
@@ -2210,6 +2493,7 @@ const stats = computed(() => ({
   padding: 0 0.65rem;
   z-index: 2;
 }
+
 .nav-btn {
   pointer-events: auto;
   width: 40px;
@@ -2224,7 +2508,10 @@ const stats = computed(() => ({
   color: var(--c-text);
   transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease, background 200ms ease, opacity 200ms ease;
   opacity: 0;
-  .drawer-carousel:hover & { opacity: 1; }
+
+  .drawer-carousel:hover & {
+    opacity: 1;
+  }
 
   &:hover {
     transform: scale(1.1);
@@ -2234,39 +2521,73 @@ const stats = computed(() => ({
   }
 }
 
-/* ──── Thumbs ──── */
 .thumbs {
   margin-top: 0.85rem;
-  display: flex;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0.5rem;
-  overflow-x: auto;
-  padding-bottom: 0.2rem;
-  scrollbar-width: none;
-  &::-webkit-scrollbar { display: none; }
+  align-items: stretch;
 }
+
 .thumb {
-  flex: 0 0 auto;
-  width: 80px;
-  height: 54px;
+  width: 100%;
+  aspect-ratio: 80 / 54;
   border-radius: 0.65rem;
   overflow: hidden;
-  border: 2px solid transparent;
+  border: 1px solid color-mix(in srgb, var(--c-border) 35%, transparent);
   background: color-mix(in srgb, var(--c-bg-2) 80%, transparent);
   cursor: pointer;
   transition: transform 200ms ease, border-color 200ms ease, opacity 200ms ease, box-shadow 200ms ease;
-  opacity: 0.6;
+  opacity: 0.65;
+  display: block;
 
-  img { width: 100%; height: 100%; object-fit: cover; display: block; -webkit-user-drag: none; user-drag: none; }
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    -webkit-user-drag: none;
+    user-drag: none;
+  }
+
   &:hover {
     transform: translateY(-2px);
-    opacity: 0.9;
+    opacity: 0.92;
   }
+
   &.active {
     opacity: 1;
-    border-color: var(--c-primary);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-primary) 18%, transparent);
+    border-color: color-mix(in srgb, var(--c-primary) 55%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--c-primary) 35%, transparent);
   }
 }
+
+.thumb--ellipsis,
+.thumb--empty {
+  width: 100%;
+  aspect-ratio: 80 / 54;
+  border-radius: 0.65rem;
+}
+
+.thumb--ellipsis {
+  display: grid;
+  place-items: center;
+  border: 1px dashed color-mix(in srgb, var(--c-border) 45%, transparent);
+  background: color-mix(in srgb, var(--c-bg-1) 55%, transparent);
+  color: var(--c-text-3);
+  font-family: var(--font-monospace);
+  font-size: 1.1rem;
+  font-weight: 700;
+  user-select: none;
+  cursor: default;
+}
+
+.thumb--empty {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .thumb-video {
   width: 100%;
   height: 100%;
@@ -2280,47 +2601,121 @@ const stats = computed(() => ({
   color: var(--c-text-3);
 }
 
-/* ──── Transitions ──── */
 .mask-fade-enter-active,
-.mask-fade-leave-active { transition: opacity 280ms ease; }
+.mask-fade-leave-active {
+  transition: opacity 280ms ease;
+}
+
 .mask-fade-enter-from,
-.mask-fade-leave-to { opacity: 0; }
+.mask-fade-leave-to {
+  opacity: 0;
+}
 
-.modal-pop-enter-active { transition: transform 320ms cubic-bezier(.16,1,.3,1), opacity 320ms ease; }
-.modal-pop-leave-active { transition: transform 200ms ease, opacity 200ms ease; }
-.modal-pop-enter-from { transform: translateY(20px) scale(0.96); opacity: 0; }
-.modal-pop-leave-to { transform: translateY(12px) scale(0.97); opacity: 0; }
+.modal-pop-enter-active,
+.modal-pop-leave-active {
+  transition: opacity 280ms ease;
+}
 
-/* ──── Responsive ──── */
+.modal-pop-enter-from,
+.modal-pop-leave-to {
+  opacity: 0;
+}
+
 @media (max-width: 980px) {
-  .main-card { grid-template-columns: 1fr; }
-  .carousel-slide img, .carousel-slide video { height: 220px; }
-  .waterfall { column-count: 2; }
-  .drawer-body { grid-template-columns: 1fr; }
-  .detail-inner img, .detail-inner video { height: 280px; }
-  .kb-stat { padding: 0 0.8rem; }
-  .kb-stat__number { font-size: 1.25rem; }
-  .nav-btn { opacity: 1; }
-}
-@media (max-width: 640px) {
-  .kb-page { padding: 2rem 0 3rem; }
-  .kb-hero { margin-bottom: 1.5rem; }
-  .kb-stats { padding: 0.5rem 0.8rem; }
-  .kb-stat { padding: 0 0.6rem; }
-  .kb-stat__divider { height: 1.8rem; }
-  .waterfall { column-count: 1; }
-  .search { min-width: 100%; }
-  .select-group { width: 100%; }
-  .select-group .select { flex: 1; }
-  .select-group .select select { width: 100%; }
-  .thumb { width: 68px; height: 46px; }
-  .filters { gap: 0.5rem; }
-  .drawer { border-radius: 1.2rem; }
-  .drawer-body { padding: 1rem; gap: 1rem; }
-  .drawer-title { font-size: 1.25rem; }
+  .main-card {
+    grid-template-columns: 1fr;
+  }
+
+  .carousel-slide img,
+  .carousel-slide video {
+    height: 220px;
+  }
+
+  .waterfall {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .drawer-body {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-inner img,
+  .detail-inner video {
+    height: 280px;
+  }
+
+  .kb-stat {
+    padding: 0 0.8rem;
+  }
+
+  .kb-stat__number {
+    font-size: 1.25rem;
+  }
+
+  .nav-btn {
+    opacity: 1;
+  }
 }
 
-/* ──── Reduce motion ──── */
+@media (max-width: 640px) {
+  .kb-page {
+    padding: 2rem 0 3rem;
+  }
+
+  .kb-hero {
+    margin-bottom: 1.5rem;
+  }
+
+  .kb-stats {
+    padding: 0.5rem 0.8rem;
+  }
+
+  .kb-stat {
+    padding: 0 0.6rem;
+  }
+
+  .kb-stat__divider {
+    height: 1.8rem;
+  }
+
+  .waterfall {
+    grid-template-columns: 1fr;
+  }
+
+  .search {
+    min-width: 100%;
+  }
+
+  .select-group {
+    width: 100%;
+  }
+
+  .select-group .select {
+    flex: 1;
+  }
+
+  .filters {
+    gap: 0.5rem;
+  }
+
+  .drawer {
+    border-radius: 1.2rem;
+  }
+
+  .drawer-body {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .drawer-title {
+    font-size: 1.25rem;
+  }
+
+  .thumbs {
+    gap: 0.35rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
