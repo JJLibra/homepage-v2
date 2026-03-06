@@ -2758,28 +2758,24 @@ const stats = computed(() => ({
 .switch-item {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
-  padding: 1.15rem 1.5rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--c-border) 25%, transparent);
-  transition: background 200ms ease;
+  gap: 1.5rem;
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--c-border) 20%, transparent);
 }
 
 .switch-item:last-child {
   border-bottom: none;
 }
 
-.switch-item:hover {
-  background: color-mix(in srgb, var(--c-primary) 4%, transparent);
-}
-
 .switch-item__index {
   flex-shrink: 0;
   font-family: var(--font-monospace);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--c-text-3);
-  width: 1.75rem;
+  font-size: 1.5rem;
+  font-weight: 200;
+  letter-spacing: -0.06em;
+  color: color-mix(in srgb, var(--c-text) 25%, transparent);
+  width: 2.5rem;
+  text-align: right;
 }
 
 .switch-item__main {
@@ -3320,8 +3316,13 @@ const stats = computed(() => ({
   }
 
   .switch-item {
-    padding: 1rem;
+    padding: 0.9rem 1rem;
     gap: 1rem;
+  }
+
+  .switch-item__index {
+    font-size: 1.25rem;
+    width: 2rem;
   }
 
   .switch-item__name {
