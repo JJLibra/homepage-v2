@@ -1435,37 +1435,35 @@ const stats = computed(() => ({
         </div>
       </header>
 
-      <div class="switch-grid">
-        <article
-          v-for="(item, idx) in playedSwitches"
-          :key="item.name"
-          class="switch-card"
-        >
-          <div class="switch-card__header">
-            <span class="switch-card__index">{{ String(idx + 1).padStart(2, '0') }}</span>
-            <span class="switch-card__type" :class="`switch-card__type--${item.type}`">{{ item.type }}</span>
-          </div>
-          <h3 class="switch-card__name">{{ item.name }}</h3>
-          <div class="switch-card__traits">
-            <div class="switch-card__trait">
-              <span class="switch-card__trait-label">手感</span>
-              <span class="switch-card__trait-value">{{ item.profile }}</span>
+      <div class="switch-list-container">
+        <ol class="switch-list">
+          <li
+            v-for="(item, idx) in playedSwitches"
+            :key="item.name"
+            class="switch-item"
+          >
+            <span class="switch-item__index">{{ String(idx + 1).padStart(2, '0') }}</span>
+            <div class="switch-item__main">
+              <div class="switch-item__header">
+                <h3 class="switch-item__name">{{ item.name }}</h3>
+                <span class="switch-item__type" :class="`switch-item__type--${item.type}`">{{ item.type }}</span>
+              </div>
+              <div class="switch-item__meta">
+                <span class="switch-item__trait">{{ item.profile }}</span>
+                <span class="switch-item__divider" />
+                <span class="switch-item__trait">{{ item.sound }}</span>
+                <template v-if="item.tags.length">
+                  <span class="switch-item__divider" />
+                  <span
+                    v-for="tag in item.tags"
+                    :key="tag"
+                    class="switch-item__tag"
+                  >{{ tag }}</span>
+                </template>
+              </div>
             </div>
-            <div class="switch-card__trait">
-              <span class="switch-card__trait-label">声音</span>
-              <span class="switch-card__trait-value">{{ item.sound }}</span>
-            </div>
-          </div>
-          <div class="switch-card__tags">
-            <span
-              v-for="tag in item.tags"
-              :key="tag"
-              class="switch-card__tag"
-            >
-              {{ tag }}
-            </span>
-          </div>
-        </article>
+          </li>
+        </ol>
       </div>
     </section>
 
@@ -2742,155 +2740,124 @@ const stats = computed(() => ({
   background: #10b981;
 }
 
-/* Switch Grid */
-.switch-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
-}
-
-.switch-card {
+/* Switch List */
+.switch-list-container {
   position: relative;
-  padding: 1.5rem;
   border-radius: 1.25rem;
   border: 1px solid color-mix(in srgb, var(--c-border) 40%, transparent);
-  background: color-mix(in srgb, var(--c-bg-1) 60%, transparent);
-  backdrop-filter: blur(12px);
-  transition: all 280ms cubic-bezier(0.4, 0, 0.2, 1);
+  background: color-mix(in srgb, var(--c-bg-1) 50%, transparent);
   overflow: hidden;
 }
 
-.switch-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: opacity 280ms ease;
-  background: radial-gradient(
-    ellipse 80% 50% at 50% 0%,
-    color-mix(in srgb, var(--c-primary) 12%, transparent),
-    transparent
-  );
-  pointer-events: none;
+.switch-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-.switch-card:hover {
-  border-color: color-mix(in srgb, var(--c-primary) 35%, transparent);
-  transform: translateY(-4px);
-  box-shadow:
-    0 12px 40px color-mix(in srgb, var(--c-text) 8%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--c-primary) 10%, transparent);
-}
-
-.switch-card:hover::before {
-  opacity: 1;
-}
-
-.switch-card__header {
+.switch-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
+  gap: 1.25rem;
+  padding: 1.15rem 1.5rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--c-border) 25%, transparent);
+  transition: background 200ms ease;
 }
 
-.switch-card__index {
+.switch-item:last-child {
+  border-bottom: none;
+}
+
+.switch-item:hover {
+  background: color-mix(in srgb, var(--c-primary) 4%, transparent);
+}
+
+.switch-item__index {
+  flex-shrink: 0;
   font-family: var(--font-monospace);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  color: var(--c-text-3);
-  padding: 0.25rem 0.5rem;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--c-bg) 60%, transparent);
-}
-
-.switch-card__type {
-  font-family: var(--font-monospace);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 0.35rem 0.65rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--c-text) 8%, transparent);
-  color: var(--c-text-2);
-  transition: all 200ms ease;
-}
-
-.switch-card__type--线性 {
-  background: color-mix(in srgb, #3b82f6 15%, transparent);
-  color: #3b82f6;
-}
-
-.switch-card__type--段落 {
-  background: color-mix(in srgb, #f59e0b 15%, transparent);
-  color: #f59e0b;
-}
-
-.switch-card__type--静音 {
-  background: color-mix(in srgb, #10b981 15%, transparent);
-  color: #10b981;
-}
-
-.switch-card__name {
-  margin: 0 0 1.25rem;
-  font-size: 1.25rem;
-  font-weight: 800;
   letter-spacing: -0.02em;
+  color: var(--c-text-3);
+  width: 1.75rem;
+}
+
+.switch-item__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.switch-item__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.switch-item__name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   color: var(--c-text);
   line-height: 1.3;
 }
 
-.switch-card__traits {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
-}
-
-.switch-card__trait {
-  display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
-}
-
-.switch-card__trait-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--c-text-3);
-  text-transform: uppercase;
+.switch-item__type {
+  font-family: var(--font-monospace);
+  font-size: 0.6rem;
+  font-weight: 700;
   letter-spacing: 0.06em;
-  min-width: 2.5rem;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--c-text) 8%, transparent);
+  color: var(--c-text-2);
 }
 
-.switch-card__trait-value {
-  font-size: 0.85rem;
+.switch-item__type--线性 {
+  background: color-mix(in srgb, #3b82f6 12%, transparent);
+  color: #3b82f6;
+}
+
+.switch-item__type--段落 {
+  background: color-mix(in srgb, #f59e0b 12%, transparent);
+  color: #f59e0b;
+}
+
+.switch-item__type--静音 {
+  background: color-mix(in srgb, #10b981 12%, transparent);
+  color: #10b981;
+}
+
+.switch-item__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.switch-item__trait {
+  font-size: 0.8rem;
   font-weight: 500;
   color: var(--c-text-2);
-  line-height: 1.4;
 }
 
-.switch-card__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  padding-top: 1rem;
-  border-top: 1px solid color-mix(in srgb, var(--c-border) 30%, transparent);
+.switch-item__divider {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--c-text-3);
+  opacity: 0.5;
 }
 
-.switch-card__tag {
-  font-size: 0.7rem;
-  font-weight: 600;
+.switch-item__tag {
+  font-size: 0.75rem;
+  font-weight: 500;
   color: var(--c-text-3);
-  padding: 0.3rem 0.6rem;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--c-bg) 70%, transparent);
-  transition: all 180ms ease;
-}
-
-.switch-card:hover .switch-card__tag {
-  background: color-mix(in srgb, var(--c-primary) 10%, transparent);
-  color: var(--c-text-2);
 }
 
 .drawer-mask {
@@ -3261,13 +3228,8 @@ const stats = computed(() => ({
     opacity: 1;
   }
 
-  .switch-grid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 0.85rem;
-  }
-
-  .switch-card {
-    padding: 1.25rem;
+  .switch-item {
+    padding: 1rem 1.25rem;
   }
 }
 
@@ -3353,24 +3315,25 @@ const stats = computed(() => ({
     justify-content: space-between;
   }
 
-  .switch-grid {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-  }
-
-  .switch-card {
-    padding: 1.15rem;
+  .switch-list-container {
     border-radius: 1rem;
   }
 
-  .switch-card__name {
-    font-size: 1.1rem;
-    margin-bottom: 1rem;
+  .switch-item {
+    padding: 1rem;
+    gap: 1rem;
   }
 
-  .switch-card__traits {
-    gap: 0.6rem;
-    margin-bottom: 1rem;
+  .switch-item__name {
+    font-size: 0.95rem;
+  }
+
+  .switch-item__meta {
+    gap: 0.4rem;
+  }
+
+  .switch-item__trait {
+    font-size: 0.75rem;
   }
 
   .switch-stats__total {
