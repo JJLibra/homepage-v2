@@ -1412,66 +1412,60 @@ const stats = computed(() => ({
     </section>
 
     <section class="kb-switches">
-      <header class="played-head switch-head">
-        <div class="played-head__top switch-head__top">
-          <div class="played-head__title-group">
-            <span class="played-head__en">SWITCH ARCHIVE</span>
-            <h2>流水的轴体</h2>
+      <header class="switch-section-header">
+        <div class="switch-section-header__left">
+          <span class="switch-section-header__label">SWITCH ARCHIVE</span>
+          <h2 class="switch-section-header__title">流水的轴体</h2>
+        </div>
+        <div class="switch-section-header__right">
+          <div class="switch-stats">
+            <span class="switch-stats__total">{{ switchStats.total }}</span>
+            <span class="switch-stats__unit">枚</span>
           </div>
-
-          <div class="switch-summary">
-            <span class="played-count">{{ switchStats.total }} 枚</span>
-            <div class="switch-breakdown">
-              <span
-                v-for="item in switchStats.types"
-                :key="item.type"
-                class="switch-breakdown__item"
-              >
-                {{ item.type }} {{ item.count }}
-              </span>
-            </div>
+          <div class="switch-stats__types">
+            <span
+              v-for="item in switchStats.types"
+              :key="item.type"
+              class="switch-stats__type-item"
+            >
+              <span class="switch-stats__type-dot" :class="`switch-stats__type-dot--${item.type}`" />
+              {{ item.type }} {{ item.count }}
+            </span>
           </div>
         </div>
       </header>
 
-      <div class="switch-archive">
-        <div class="switch-archive__head" aria-hidden="true">
-          <span>#</span>
-          <span>轴体</span>
-          <span>特征</span>
-          <span>备注</span>
-        </div>
-
-        <ol class="switch-list">
-          <li
-            v-for="(item, idx) in playedSwitches"
-            :key="item.name"
-            class="switch-row"
-          >
-            <div class="switch-row__index">{{ String(idx + 1).padStart(2, '0') }}</div>
-
-            <div class="switch-row__name">
-              <div class="switch-row__titleline">
-                <h3>{{ item.name }}</h3>
-                <span class="switch-type">{{ item.type }}</span>
-              </div>
+      <div class="switch-grid">
+        <article
+          v-for="(item, idx) in playedSwitches"
+          :key="item.name"
+          class="switch-card"
+        >
+          <div class="switch-card__header">
+            <span class="switch-card__index">{{ String(idx + 1).padStart(2, '0') }}</span>
+            <span class="switch-card__type" :class="`switch-card__type--${item.type}`">{{ item.type }}</span>
+          </div>
+          <h3 class="switch-card__name">{{ item.name }}</h3>
+          <div class="switch-card__traits">
+            <div class="switch-card__trait">
+              <span class="switch-card__trait-label">手感</span>
+              <span class="switch-card__trait-value">{{ item.profile }}</span>
             </div>
-
-            <div class="switch-row__traits">
-              <span class="switch-pill">{{ item.profile }}</span>
-              <span class="switch-pill">{{ item.sound }}</span>
-              <span
-                v-for="tag in item.tags"
-                :key="tag"
-                class="switch-pill switch-pill--muted"
-              >
-                {{ tag }}
-              </span>
+            <div class="switch-card__trait">
+              <span class="switch-card__trait-label">声音</span>
+              <span class="switch-card__trait-value">{{ item.sound }}</span>
             </div>
-
-            <p class="switch-row__note">{{ item.note }}</p>
-          </li>
-        </ol>
+          </div>
+          <div class="switch-card__tags">
+            <span
+              v-for="tag in item.tags"
+              :key="tag"
+              class="switch-card__tag"
+            >
+              {{ tag }}
+            </span>
+          </div>
+        </article>
       </div>
     </section>
 
@@ -2652,196 +2646,251 @@ const stats = computed(() => ({
   }
 }
 
-.switch-head {
-  margin-top: 3.25rem;
-}
-
-.switch-head__top {
-  align-items: flex-start;
-}
-
-.switch-summary {
+/* Switch Section - Premium Card Layout */
+.switch-section-header {
+  margin-top: 4rem;
+  margin-bottom: 2rem;
   display: flex;
-  align-items: center;
-  gap: 0.65rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
   flex-wrap: wrap;
-  justify-content: flex-end;
 }
 
-.switch-breakdown {
+.switch-section-header__left {
   display: flex;
-  gap: 0.45rem;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
-.switch-breakdown__item {
+.switch-section-header__label {
   font-family: var(--font-monospace);
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 600;
-  color: var(--c-text-2);
-  padding: 0.24rem 0.6rem;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--c-border) 45%, transparent);
-  background: color-mix(in srgb, var(--c-bg-1) 42%, transparent);
-}
-
-.switch-archive {
-  position: relative;
-  border-radius: 1.4rem;
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--c-border) 55%, transparent);
-  background:
-    radial-gradient(120% 180% at 0% 0%, color-mix(in srgb, var(--c-primary) 8%, transparent), transparent 55%),
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--c-bg-1) 96%, transparent),
-      color-mix(in srgb, var(--c-bg-1) 90%, transparent)
-    );
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--c-border) 8%, transparent),
-    0 24px 60px color-mix(in srgb, var(--c-text) 7%, transparent);
-}
-
-.switch-archive::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(90deg, color-mix(in srgb, var(--c-primary) 6%, transparent), transparent 18%, transparent 82%, color-mix(in srgb, var(--c-primary) 6%, transparent)),
-    linear-gradient(180deg, color-mix(in srgb, #fff 8%, transparent), transparent 16%);
-  opacity: 0.8;
-}
-
-.switch-archive__head {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: 84px 1.1fr 1fr 1.15fr;
-  gap: 1rem;
-  align-items: center;
-  padding: 1rem 1.2rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--c-border) 38%, transparent);
-  background: color-mix(in srgb, var(--c-bg) 36%, transparent);
-  backdrop-filter: blur(10px);
-  font-family: var(--font-monospace);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.25em;
   text-transform: uppercase;
+  color: var(--c-primary);
+}
+
+.switch-section-header__title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: var(--c-text);
+}
+
+.switch-section-header__right {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.switch-stats {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.switch-stats__total {
+  font-family: var(--font-monospace);
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--c-text);
+  line-height: 1;
+}
+
+.switch-stats__unit {
+  font-size: 0.8rem;
+  font-weight: 500;
   color: var(--c-text-3);
 }
 
-.switch-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.switch-stats__types {
+  display: flex;
+  gap: 0.85rem;
+  flex-wrap: wrap;
 }
 
-.switch-row {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: 84px 1.1fr 1fr 1.15fr;
-  gap: 1rem;
-  align-items: start;
-  padding: 1.15rem 1.2rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--c-border) 26%, transparent);
-  transition: background 220ms ease, transform 220ms ease, box-shadow 220ms ease;
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  &:hover {
-    background:
-      linear-gradient(
-        90deg,
-        color-mix(in srgb, var(--c-primary) 7%, transparent),
-        transparent 16%,
-        transparent 84%,
-        color-mix(in srgb, var(--c-primary) 7%, transparent)
-      ),
-      color-mix(in srgb, var(--c-bg-1) 84%, transparent);
-  }
-}
-
-.switch-row__index {
-  font-family: var(--font-monospace);
-  font-size: 1.05rem;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  color: color-mix(in srgb, var(--c-text) 82%, transparent);
-  padding-top: 0.15rem;
-}
-
-.switch-row__name {
-  min-width: 0;
-}
-
-.switch-row__titleline {
+.switch-stats__type-item {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  flex-wrap: wrap;
-
-  h3 {
-    margin: 0;
-    font-size: 1.04rem;
-    font-weight: 900;
-    letter-spacing: -0.02em;
-    color: var(--c-text);
-  }
-}
-
-.switch-type {
-  display: inline-flex;
-  align-items: center;
-  height: 1.55rem;
-  padding: 0 0.55rem;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--c-primary) 26%, transparent);
-  background: color-mix(in srgb, var(--c-primary) 10%, transparent);
-  color: var(--c-primary);
+  gap: 0.4rem;
   font-family: var(--font-monospace);
-  font-size: 0.64rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.switch-row__traits {
-  display: flex;
-  gap: 0.45rem;
-  flex-wrap: wrap;
-  align-content: flex-start;
-}
-
-.switch-pill {
-  display: inline-flex;
-  align-items: center;
-  min-height: 1.7rem;
-  padding: 0.25rem 0.7rem;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--c-border) 50%, transparent);
-  background: color-mix(in srgb, var(--c-bg) 42%, transparent);
-  color: var(--c-text);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  line-height: 1.2;
+  color: var(--c-text-2);
 }
 
-.switch-pill--muted {
-  color: var(--c-text-2);
-  background: color-mix(in srgb, var(--c-bg-1) 56%, transparent);
+.switch-stats__type-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--c-text-3);
 }
 
-.switch-row__note {
-  margin: 0;
+.switch-stats__type-dot--线性 {
+  background: #3b82f6;
+}
+
+.switch-stats__type-dot--段落 {
+  background: #f59e0b;
+}
+
+.switch-stats__type-dot--静音 {
+  background: #10b981;
+}
+
+/* Switch Grid */
+.switch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.switch-card {
+  position: relative;
+  padding: 1.5rem;
+  border-radius: 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--c-border) 40%, transparent);
+  background: color-mix(in srgb, var(--c-bg-1) 60%, transparent);
+  backdrop-filter: blur(12px);
+  transition: all 280ms cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.switch-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 280ms ease;
+  background: radial-gradient(
+    ellipse 80% 50% at 50% 0%,
+    color-mix(in srgb, var(--c-primary) 12%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+
+.switch-card:hover {
+  border-color: color-mix(in srgb, var(--c-primary) 35%, transparent);
+  transform: translateY(-4px);
+  box-shadow:
+    0 12px 40px color-mix(in srgb, var(--c-text) 8%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--c-primary) 10%, transparent);
+}
+
+.switch-card:hover::before {
+  opacity: 1;
+}
+
+.switch-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.switch-card__index {
+  font-family: var(--font-monospace);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--c-text-3);
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--c-bg) 60%, transparent);
+}
+
+.switch-card__type {
+  font-family: var(--font-monospace);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--c-text) 8%, transparent);
   color: var(--c-text-2);
-  line-height: 1.78;
-  font-size: 0.88rem;
+  transition: all 200ms ease;
+}
+
+.switch-card__type--线性 {
+  background: color-mix(in srgb, #3b82f6 15%, transparent);
+  color: #3b82f6;
+}
+
+.switch-card__type--段落 {
+  background: color-mix(in srgb, #f59e0b 15%, transparent);
+  color: #f59e0b;
+}
+
+.switch-card__type--静音 {
+  background: color-mix(in srgb, #10b981 15%, transparent);
+  color: #10b981;
+}
+
+.switch-card__name {
+  margin: 0 0 1.25rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--c-text);
+  line-height: 1.3;
+}
+
+.switch-card__traits {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.switch-card__trait {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.switch-card__trait-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--c-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  min-width: 2.5rem;
+}
+
+.switch-card__trait-value {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--c-text-2);
+  line-height: 1.4;
+}
+
+.switch-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  padding-top: 1rem;
+  border-top: 1px solid color-mix(in srgb, var(--c-border) 30%, transparent);
+}
+
+.switch-card__tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--c-text-3);
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--c-bg) 70%, transparent);
+  transition: all 180ms ease;
+}
+
+.switch-card:hover .switch-card__tag {
+  background: color-mix(in srgb, var(--c-primary) 10%, transparent);
+  color: var(--c-text-2);
 }
 
 .drawer-mask {
@@ -3212,19 +3261,13 @@ const stats = computed(() => ({
     opacity: 1;
   }
 
-  .switch-archive__head,
-  .switch-row {
-    grid-template-columns: 64px 1fr;
+  .switch-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.85rem;
   }
 
-  .switch-archive__head span:nth-child(3),
-  .switch-archive__head span:nth-child(4) {
-    display: none;
-  }
-
-  .switch-row__traits,
-  .switch-row__note {
-    grid-column: 2;
+  .switch-card {
+    padding: 1.25rem;
   }
 }
 
@@ -3294,42 +3337,44 @@ const stats = computed(() => ({
     gap: 0.35rem;
   }
 
-  .switch-head__top,
   .played-head__top {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .switch-summary,
-  .switch-breakdown {
-    justify-content: flex-start;
+  .switch-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
   }
 
-  .switch-archive {
+  .switch-section-header__right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .switch-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .switch-card {
+    padding: 1.15rem;
     border-radius: 1rem;
   }
 
-  .switch-archive__head {
-    display: none;
+  .switch-card__name {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
   }
 
-  .switch-row {
-    grid-template-columns: 52px 1fr;
-    gap: 0.85rem;
-    padding: 1rem;
+  .switch-card__traits {
+    gap: 0.6rem;
+    margin-bottom: 1rem;
   }
 
-  .switch-row__traits,
-  .switch-row__note {
-    grid-column: 1 / -1;
-  }
-
-  .switch-row__index {
-    font-size: 0.95rem;
-  }
-
-  .switch-row__titleline h3 {
-    font-size: 0.98rem;
+  .switch-stats__total {
+    font-size: 1.6rem;
   }
 }
 
